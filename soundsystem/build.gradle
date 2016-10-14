@@ -1,0 +1,27 @@
+apply plugin: 'com.android.model.library'
+
+model {
+    android {
+        compileSdkVersion=24
+        buildToolsVersion="24.0.2"
+
+        defaultConfig.with {
+            minSdkVersion.apiLevel = 17
+            targetSdkVersion.apiLevel = 24
+        }
+    }
+
+    android.sources {
+        main {
+            jniLibs {
+                dependencies {
+                    project ":nativesoundsystem"
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    compile 'com.android.support:support-annotations:24.2.0'
+}

@@ -1,0 +1,29 @@
+apply plugin: 'com.android.model.native'
+
+model {
+    android {
+        compileSdkVersion = 24
+    }
+
+    android.ndk {
+        moduleName = "soundsystem"
+        ldLibs.addAll(["log", "android", "OpenSLES"])
+        abiFilters.addAll(["armeabi", "armeabi-v7a"])
+        CFlags.add("-std=c99")
+        CFlags.add("-DANDROID_SOUND_SYSTEM")
+        cppFlags.add("-std=c++11")
+        cppFlags.add("-DANDROID_SOUND_SYSTEM")
+        stl "stlport_static"
+        platformVersion = 17 //same as minSdkVersion.apiLevel for better compatibility
+    }
+
+    android.sources {
+        main {
+            jni {
+                exportedHeaders {
+                    srcDir "src/main/jni"
+                }
+            }
+        }
+    }
+}
