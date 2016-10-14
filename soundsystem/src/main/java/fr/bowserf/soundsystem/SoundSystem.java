@@ -44,11 +44,6 @@ public class SoundSystem {
     }
 
     /**
-     * A {@link Context}.
-     */
-    private Context mContext;
-
-    /**
      * List of all playing status observer.
      */
     private final List<SSPlayingStatusObserver> mPlayingStatusObservers;
@@ -67,7 +62,6 @@ public class SoundSystem {
      * Private constructor.
      */
     private SoundSystem(final Context context) {
-        mContext = context;
         mMainHandler = new Handler(context.getMainLooper());
 
         mPlayingStatusObservers = new ArrayList<>();
@@ -93,8 +87,8 @@ public class SoundSystem {
         native_load_file(filePath);
     }
 
-    public void playSong(){
-        native_extract_from_assets_and_play(mContext.getAssets(), "sound.mp3");
+    public void playSong(final Context context){
+        native_extract_from_assets_and_play(context.getAssets(), "sound.mp3");
     }
 
     /**
