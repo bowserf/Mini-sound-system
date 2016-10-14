@@ -8,7 +8,7 @@ model {
     android.ndk {
         moduleName = "soundsystem"
         ldLibs.addAll(["log", "android", "OpenSLES"])
-        abiFilters.addAll(["armeabi", "armeabi-v7a"])
+        abiFilters.addAll(["armeabi", "armeabi-v7a", "x86"])
         CFlags.add("-std=c99")
         CFlags.add("-DANDROID_SOUND_SYSTEM")
         cppFlags.add("-std=c++11")
