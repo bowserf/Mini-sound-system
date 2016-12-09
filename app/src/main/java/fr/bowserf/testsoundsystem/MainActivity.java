@@ -15,6 +15,7 @@ import android.widget.ToggleButton;
 import fr.bowserf.soundsystem.SoundSystem;
 import fr.bowserf.soundsystem.listener.SSExtractionObserver;
 import fr.bowserf.soundsystem.listener.SSPlayingStatusObserver;
+import fr.bowserf.testsoundsystem.utils.FindTrackManager;
 
 /**
  * Simple activity launching the sound system.
@@ -139,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.toggle_extract_file:
-                    mSoundSystem.loadFile("/sdcard/Music/test.mp3");
+                    mSoundSystem.loadFile(FindTrackManager.getTrackPath(MainActivity.this).getPath());
                     break;
                 case R.id.btn_stop:
                     mSoundSystem.stopMusic();
