@@ -332,9 +332,12 @@ void SoundSystem::stop() {
 };
 
 int SoundSystem::getPlayerState() {
-    SLuint32 currentState;
-    (*_playerPlay)->GetPlayState(_playerPlay, &currentState);
-    return currentState;
+    if(_playerPlay != NULL) {
+        SLuint32 currentState;
+        (*_playerPlay)->GetPlayState(_playerPlay, &currentState);
+        return currentState;
+    }
+    return -1;
 }
 
 void SoundSystem::sendSoundBufferExtract() {
