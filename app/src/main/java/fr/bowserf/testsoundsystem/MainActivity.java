@@ -54,9 +54,11 @@ public class MainActivity extends AppCompatActivity {
         getAudioInformation();
 
         mSoundSystem = SoundSystem.getInstance(this);
-        mSoundSystem.initSoundSystem(
-                mSampleRate,
-                mFramesPerBufferInt);
+        if(!mSoundSystem.isSoundSystemInit()) {
+            mSoundSystem.initSoundSystem(
+                    mSampleRate,
+                    mFramesPerBufferInt);
+        }
 
         initUI();
 
@@ -64,22 +66,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initUI() {
-        // stop button
-        mToggleStop = (Button) findViewById(R.id.btn_stop);
-        mToggleStop.setOnClickListener(mOnClickListener);
-        mToggleStop.setEnabled(false);
-
         //extract button
         mBtnExtractFile = (Button) findViewById(R.id.toggle_extract_file);
         mBtnExtractFile.setOnClickListener(mOnClickListener);
 
-        //tv sound system status
-        mTvSoundSystemStatus = (TextView) findViewById(R.id.tv_sound_system_status);
-
         //play pause button
         mTogglePlayPause = (ToggleButton) findViewById(R.id.toggle_play_pause);
         mTogglePlayPause.setOnCheckedChangeListener(mOnCheckedChangeListener);
+
+        // stop button
+        mToggleStop = (Button) findViewById(R.id.btn_stop);
+        mToggleStop.setOnClickListener(mOnClickListener);
+
+        //tv sound system status
+        mTvSoundSystemStatus = (TextView) findViewById(R.id.tv_sound_system_status);
+
         mTogglePlayPause.setEnabled(false);
+        mToggleStop.setEnabled(false);
+
+        mTogglePlayPause.setChecked(mSoundSystem.isPlaying());
     }
 
     @Override
