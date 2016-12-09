@@ -5,14 +5,19 @@ void Java_fr_bowserf_soundsystem_SoundSystem_native_1init_1soundsystem(JNIEnv *e
                                                                jint sample_rate,
                                                                jint frames_per_buf) {
     _soundSystemCallback = new SoundSystemCallback(env, jclass1);
-    LOGI("sound system callback init");
+
     _soundSystem = new SoundSystem(_soundSystemCallback, sample_rate, frames_per_buf);
+}
+
+jboolean Java_fr_bowserf_soundsystem_SoundSystem_native_1is_1soundsystem_1init(JNIEnv *env,
+                                                                       jclass jclass1) {
+    return (jboolean)isSoundSystemInit();
 }
 
 void Java_fr_bowserf_soundsystem_SoundSystem_native_1load_1file(JNIEnv *env,
                                                                jclass jclass1,
                                                                jstring filePath) {
-    if(!checkSoundSystemInit()){
+    if(!isSoundSystemInit()){
         return;
     }
     _soundSystem->extractMusic(dataLocatorFromURLString(env, filePath));
@@ -20,28 +25,28 @@ void Java_fr_bowserf_soundsystem_SoundSystem_native_1load_1file(JNIEnv *env,
 }
 
 void Java_fr_bowserf_soundsystem_SoundSystem_native_1play(JNIEnv *env, jclass jclass1, jboolean play){
-    if(!checkSoundSystemInit()){
+    if(!isSoundSystemInit()){
         return;
     }
     _soundSystem->play(play);
 }
 
 void Java_fr_bowserf_soundsystem_SoundSystem_native_1stop(JNIEnv *env, jclass jclass1) {
-    if(!checkSoundSystemInit()){
+    if(!isSoundSystemInit()){
         return;
     }
     _soundSystem->stop();
 }
 
 void Java_fr_bowserf_soundsystem_SoundSystem_native_1extract_1and_1play(JNIEnv *env, jobject obj, jstring filePath){
-    if(!checkSoundSystemInit()){
+    if(!isSoundSystemInit()){
         return;
     }
     _soundSystem->extractAndPlayDirectly(dataLocatorFromURLString(env, filePath));
 }
 
 void Java_fr_bowserf_soundsystem_SoundSystem_native_1extract_1from_1assets_1and_1play(JNIEnv *env, jobject obj, jobject assetManager, jstring filename){
-    if(!checkSoundSystemInit()){
+    if(!isSoundSystemInit()){
         return;
     }
     SLDataLocator_AndroidFD locator = getTrackFromAsset(env, assetManager, filename);
@@ -79,7 +84,7 @@ SLDataLocator_AndroidFD getTrackFromAsset(JNIEnv *env, jobject assetManager, jst
     return loc_fd;
 }
 
-bool checkSoundSystemInit(){
+bool isSoundSystemInit(){
     if(_soundSystem == NULL){
         LOGE("_soundSystem is not initialize");
         return false;

@@ -78,6 +78,10 @@ public class SoundSystem {
         native_init_soundsystem(nativeFrameRate, nativeFramesPerBuf);
     }
 
+    public boolean isSoundSystemInit(){
+        return native_is_soundsystem_init();
+    }
+
     /**
      * Load track file into the RAM.
      *
@@ -246,6 +250,8 @@ public class SoundSystem {
     //--------------------
 
     private native void native_init_soundsystem(int nativeFrameRate, int nativeFramesPerBuf);
+
+    private native boolean native_is_soundsystem_init();
 
     private native void native_load_file(String filePath);
 

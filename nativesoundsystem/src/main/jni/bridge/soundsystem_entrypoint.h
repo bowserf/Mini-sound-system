@@ -50,7 +50,7 @@ extern "C" {
     void Java_fr_bowserf_soundsystem_SoundSystem_native_1extract_1from_1assets_1and_1play(JNIEnv *env, jobject obj, jobject assetManager, jstring filename);
 }
 
-bool checkSoundSystemInit();
+bool isSoundSystemInit();
 
 SLDataLocator_URI *dataLocatorFromURLString(JNIEnv *env, jstring fileURLString);
 
