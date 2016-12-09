@@ -50,6 +50,8 @@ public:
 
     void play(bool play);
 
+    bool isPlaying();
+
     void stop();
 
     int getPlayerState();

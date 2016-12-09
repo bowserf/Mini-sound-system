@@ -105,6 +105,14 @@ public class SoundSystem {
     }
 
     /**
+     * Get if a track is currently playing or not.
+     * @return  True if a track is played.
+     */
+    public boolean isPlaying(){
+        return native_is_playing();
+    }
+
+    /**
      * Stop music.
      */
     public void stopMusic() {
@@ -258,6 +266,8 @@ public class SoundSystem {
     private native void native_release_soundsystem();
 
     private native void native_play(boolean play);
+
+    private native boolean native_is_playing();
 
     private native void native_stop();
 

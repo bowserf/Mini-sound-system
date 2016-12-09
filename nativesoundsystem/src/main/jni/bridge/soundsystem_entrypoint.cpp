@@ -31,6 +31,10 @@ void Java_fr_bowserf_soundsystem_SoundSystem_native_1play(JNIEnv *env, jclass jc
     _soundSystem->play(play);
 }
 
+jboolean Java_fr_bowserf_soundsystem_SoundSystem_native_1is_1playing(JNIEnv *env, jclass jclass1){
+    return (jboolean)_soundSystem->isPlaying();
+}
+
 void Java_fr_bowserf_soundsystem_SoundSystem_native_1stop(JNIEnv *env, jclass jclass1) {
     if(!isSoundSystemInit()){
         return;

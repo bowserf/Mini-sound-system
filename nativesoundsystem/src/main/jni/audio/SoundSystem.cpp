@@ -170,7 +170,7 @@ void SoundSystem::extractMusic(SLDataLocator_URI *fileLoc) {
     // get the play interface
     result = (*_extractPlayerObject)->GetInterface(_extractPlayerObject, SL_IID_PLAY,
                                                    &_extractPlayerPlay);
-    assert(SL_RESULT_SUCCESS == result);
+    SLASSERT(result);
 
     // register callback on the player event
     result = (*_extractPlayerPlay)->RegisterCallback(_extractPlayerPlay, extractionEndCallback,
@@ -178,11 +178,11 @@ void SoundSystem::extractMusic(SLDataLocator_URI *fileLoc) {
     // enables/disables notification of playback events.
     result = (*_extractPlayerPlay)->SetCallbackEventsMask(_extractPlayerPlay,
                                                           SL_PLAYEVENT_HEADATEND);
-    assert(SL_RESULT_SUCCESS == result);
+    SLASSERT(result);
 
     result = (*_extractPlayerObject)->GetInterface(_extractPlayerObject, SL_IID_METADATAEXTRACTION,
                                                    &_extractPlayerMetadata);
-    assert(SL_RESULT_SUCCESS == result);
+    SLASSERT(result);
 
     // register callback for queue
     result = (*_extractPlayerBufferQueue)->RegisterCallback(_extractPlayerBufferQueue,
@@ -198,7 +198,7 @@ void SoundSystem::extractMusic(SLDataLocator_URI *fileLoc) {
 
     // start the extraction
     result = (*_extractPlayerPlay)->SetPlayState(_extractPlayerPlay, SL_PLAYSTATE_PLAYING);
-    assert(SL_RESULT_SUCCESS == result);
+    SLASSERT(result);
 
     notifyExtractionStarted();
 }
@@ -246,14 +246,18 @@ void SoundSystem::initAudioPlayer() {
     // get the buffer queue interface
     result = (*_playerObject)->GetInterface(_playerObject, SL_IID_ANDROIDSIMPLEBUFFERQUEUE,
                                             &_playerQueue);
-    assert(SL_RESULT_SUCCESS == result);
+    SLASSERT(result);
     // register callback for queue
     result = (*_playerQueue)->RegisterCallback(_playerQueue, queuePlayerCallback, this);
     SLASSERT(result);
 }
 
+bool SoundSystem::isPlaying(){
+    return getPlayerState() == SL_PLAYSTATE_PLAYING;
+}
+
 void SoundSystem::extractAndPlayDirectly(void *sourceFile) {
-    if(_playerPlay != NULL && getPlayerState() == SL_PLAYSTATE_PLAYING){
+    if(_playerPlay != NULL && isPlaying()){
         return;
     }
 
