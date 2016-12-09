@@ -2,12 +2,12 @@ apply plugin: 'com.android.model.library'
 
 model {
     android {
-        compileSdkVersion=24
-        buildToolsVersion="24.0.2"
+        compileSdkVersion rootProject.ext.compileSdkVersion
+        buildToolsVersion rootProject.ext.buildToolsVersion
 
         defaultConfig.with {
-            minSdkVersion.apiLevel = 17
-            targetSdkVersion.apiLevel = 24
+            minSdkVersion.apiLevel rootProject.ext.minSdkVersion
+            targetSdkVersion.apiLevel rootProject.ext.targetSdkVersion
         }
     }
 
@@ -23,5 +23,5 @@ model {
 }
 
 dependencies {
-    compile 'com.android.support:support-annotations:24.2.0'
+    compile 'com.android.support:support-annotations:25.0.1'
 }

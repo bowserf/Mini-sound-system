@@ -2,13 +2,13 @@ apply plugin: 'com.android.model.application'
 
 model {
     android {
-        compileSdkVersion=24
-        buildToolsVersion="24.0.2"
+        compileSdkVersion rootProject.ext.compileSdkVersion
+        buildToolsVersion rootProject.ext.buildToolsVersion
 
         defaultConfig.with {
             applicationId "fr.bowserf.testsoundsystem"
-            minSdkVersion.apiLevel=17
-            targetSdkVersion.apiLevel=24
+            minSdkVersion.apiLevel rootProject.ext.minSdkVersion
+            targetSdkVersion.apiLevel rootProject.ext.targetSdkVersion
             versionCode=1
             versionName="1.0"
         }
@@ -23,7 +23,7 @@ model {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:24.2.0'
+    compile 'com.android.support:appcompat-v7:25.0.1'
 
     compile project(':soundsystem')
 }
