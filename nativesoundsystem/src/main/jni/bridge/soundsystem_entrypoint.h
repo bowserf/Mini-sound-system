@@ -41,6 +41,10 @@ extern "C" {
 
     void Java_fr_bowserf_soundsystem_SoundSystem_native_1play(JNIEnv *env, jclass jclass1, jboolean play);
 
+    jboolean Java_fr_bowserf_soundsystem_SoundSystem_native_1is_1playing(JNIEnv *env, jclass jclass1);
+
+    jboolean Java_fr_bowserf_soundsystem_SoundSystem_native_1is_1soundsystem_1init(JNIEnv *env, jclass jclass1);
+
     void Java_fr_bowserf_soundsystem_SoundSystem_native_1stop(JNIEnv *env, jclass jclass1);
 
     void Java_fr_bowserf_soundsystem_SoundSystem_native_1extract_1and_1play(JNIEnv *env, jobject obj, jstring filePath);
