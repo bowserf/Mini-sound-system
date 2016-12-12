@@ -1,11 +1,8 @@
 package fr.bowserf.testsoundsystem;
 
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.media.AudioManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -15,6 +12,8 @@ import android.widget.ToggleButton;
 import fr.bowserf.soundsystem.SoundSystem;
 import fr.bowserf.soundsystem.listener.SSExtractionObserver;
 import fr.bowserf.soundsystem.listener.SSPlayingStatusObserver;
+import fr.bowserf.testsoundsystem.spectrum.SpectrumGLSurfaceView;
+import fr.bowserf.testsoundsystem.utils.AudioFeaturesManager;
 import fr.bowserf.testsoundsystem.utils.FindTrackManager;
 
 /**
@@ -26,20 +25,13 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     /**
-     * Audio params
-     */
-    private boolean mHasLowLatencyFeature;
-    private boolean mHasProFeature;
-    private int mSampleRate;
-    private int mFramesPerBufferInt;
-
-    /**
      * UI
      */
     private Button mToggleStop;
     private Button mBtnExtractFile;
     private TextView mTvSoundSystemStatus;
     private ToggleButton mTogglePlayPause;
+    private SpectrumGLSurfaceView mSpectrum;
 
     /**
      * Sound system
@@ -51,13 +43,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        getAudioInformation();
+        final AudioFeaturesManager audioFeaturesManager = AudioFeaturesManager.init(this);
+
 
         mSoundSystem = SoundSystem.getInstance(this);
         if(!mSoundSystem.isSoundSystemInit()) {
             mSoundSystem.initSoundSystem(
-                    mSampleRate,
-                    mFramesPerBufferInt);
+                    audioFeaturesManager.getSampleRate(),
+                    audioFeaturesManager.getFramesPerBufferInt());
         }
 
         initUI();
@@ -85,6 +78,20 @@ public class MainActivity extends AppCompatActivity {
         mToggleStop.setEnabled(false);
 
         mTogglePlayPause.setChecked(mSoundSystem.isPlaying());
+
+        mSpectrum = (SpectrumGLSurfaceView)findViewById(R.id.spectrum);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mSpectrum.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        mSpectrum.onPause();
+        super.onPause();
     }
 
     @Override
@@ -116,6 +123,13 @@ public class MainActivity extends AppCompatActivity {
             mTogglePlayPause.setEnabled(true);
             mToggleStop.setEnabled(true);
             mTvSoundSystemStatus.setText("Extraction ended");
+
+
+            final DisplayMetrics metrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+            mSpectrum.drawData(mSoundSystem.getExtractedData(),
+                    metrics.widthPixels);
         }
     };
 
@@ -164,30 +178,5 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
-
-    private void getAudioInformation() {
-        mHasLowLatencyFeature = getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUDIO_LOW_LATENCY);
-
-        mHasProFeature = false;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mHasProFeature = getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUDIO_PRO);
-        }
-
-        final AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-
-        // get native sample rate
-        final String sampleRateStr = am.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE);
-        mSampleRate = Integer.parseInt(sampleRateStr);
-        if (mSampleRate == 0) { // Use a default value if property not found
-            mSampleRate = 44100;
-        }
-
-        // get native buffer size
-        final String framesPerBuffer = am.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
-        mFramesPerBufferInt = Integer.parseInt(framesPerBuffer);
-        if (mFramesPerBufferInt == 0) { // Use default
-            mFramesPerBufferInt = 256;
-        }
-    }
 
 }
