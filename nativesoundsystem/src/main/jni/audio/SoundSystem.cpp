@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "SoundSystem.h"
 
 static void extractionEndCallback(SLPlayItf caller, void *pContext, SLuint32 event) {
@@ -34,12 +35,12 @@ void SoundSystem::fillDataBuffer() {
     if (_needExtractInitialisation) {
         extractMetaData();
         _needExtractInitialisation = false;
-        _data = (SLuint16 *) calloc(_totalFrames * 4, sizeof(SLuint16));
+        _extractedData = (short*) calloc(_totalFrames * 4, sizeof(short));
     }
 
     int sizeBuffer = _bufferSize * sizeof(SLuint16);
-    memmove(_data + _positionExtract, _soundBuffer, sizeBuffer);
-    _positionExtract += sizeBuffer;
+    memmove(_extractedData + _positionExtract, _soundBuffer, sizeBuffer);
+    _positionExtract += _bufferSize;
 }
 
 void SoundSystem::getData() {
@@ -49,8 +50,8 @@ void SoundSystem::getData() {
     }
 
     int sizeBuffer = _bufferSize * sizeof(SLuint16);
-    memmove(_soundBuffer, _data + _positionPlay, sizeBuffer);
-    _positionPlay += sizeBuffer;
+    memmove(_soundBuffer, _extractedData + _positionPlay, sizeBuffer);
+    _positionPlay += _bufferSize;
 }
 
 SoundSystem::SoundSystem(SoundSystemCallback *callback,
@@ -190,7 +191,7 @@ void SoundSystem::extractMusic(SLDataLocator_URI *fileLoc) {
     SLASSERT(result);
 
     // allocate space for the buffer
-    _soundBuffer = (SLuint16 *) calloc(_bufferSize, sizeof(SLuint16));
+    _soundBuffer = (short*) calloc(_bufferSize, sizeof(short));
 
     // send two buffers
     sendSoundBufferExtract();
