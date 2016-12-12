@@ -35,7 +35,7 @@ void SoundSystem::fillDataBuffer() {
     if (_needExtractInitialisation) {
         extractMetaData();
         _needExtractInitialisation = false;
-        _extractedData = (short*) calloc(_totalFrames * 4, sizeof(short));
+        _extractedData = (short*) calloc(_totalFrames * 2, sizeof(short));
     }
 
     int sizeBuffer = _bufferSize * sizeof(SLuint16);
