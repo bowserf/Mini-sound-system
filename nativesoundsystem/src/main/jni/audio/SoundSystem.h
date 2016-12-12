@@ -66,6 +66,14 @@ public:
 
     void releasePlayer();
 
+    inline short* getExtractedData(){
+        return _extractedData;
+    }
+
+    inline unsigned int getTotalNumberFrames(){
+        return _totalFrames;
+    }
+
     //------------------------
     // - Extraction methods -
     //------------------------
@@ -84,7 +92,7 @@ private :
 
     int _sampleRate;
     int _bufferSize;
-    int _totalFrames;
+    unsigned int _totalFrames;
     int _positionExtract;
     int _positionPlay;
     bool _needExtractInitialisation;
@@ -111,10 +119,10 @@ private :
     SLAndroidSimpleBufferQueueItf _playerQueue = NULL;
 
     //buffer
-    SLuint16 *_soundBuffer = NULL;
+    short*_soundBuffer = NULL;
 
     //extracted music
-    SLuint16* _data = NULL;
+    short* _extractedData = NULL;
 };
 
 #endif //TEST_SOUNDSYSTEM_SOUNDSYSTEM_H

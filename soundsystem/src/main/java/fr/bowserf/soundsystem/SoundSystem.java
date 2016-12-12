@@ -119,6 +119,10 @@ public class SoundSystem {
         native_stop();
     }
 
+    public short[] getExtractedData(){
+        return native_get_extracted_data();
+    }
+
     /**
      * Release native objects and this object.
      */
@@ -274,4 +278,6 @@ public class SoundSystem {
     private native void native_extract_and_play(String filePath);
 
     private native void native_extract_from_assets_and_play(AssetManager assetManager, String filename);
+
+    private native short[] native_get_extracted_data();
 }
