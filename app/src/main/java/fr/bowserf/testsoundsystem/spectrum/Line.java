@@ -44,9 +44,7 @@ class Line {
 
     private int mPositionHandle;
 
-    private int mColorHandle;
-
-    private int mVerticeCount;
+    private int mVertexCount;
 
     private int mNumberDataForAverage;
 
@@ -78,10 +76,10 @@ class Line {
         mPositionHandle = GLES20.glGetAttribLocation(program, "vPosition");
 
         // get handle to fragment shader's vColor member
-        mColorHandle = glGetUniformLocation(program, "vColor");
+        int colorHandle = glGetUniformLocation(program, "vColor");
 
         // Set color for drawing the triangle
-        GLES20.glUniform4fv(mColorHandle, 1, COLOR, 0);
+        GLES20.glUniform4fv(colorHandle, 1, COLOR, 0);
 
         // use to play a little bit with fragment shader to change color line
         final int widthHandle = glGetUniformLocation(program, "width");
@@ -103,9 +101,8 @@ class Line {
         mVertexBuffer.position(0);
     }
 
-    /* package */
-    void initVertexBuffer(int vertexBufferSize){
-        mVerticeCount = vertexBufferSize / COORDS_PER_VERTEX;
+    private void initVertexBuffer(int vertexBufferSize){
+        mVertexCount = vertexBufferSize / COORDS_PER_VERTEX;
 
         // initialize vertex byte buffer for shape coordinates
         final ByteBuffer bb = ByteBuffer.allocateDirect(
@@ -137,7 +134,7 @@ class Line {
                 mVertexBuffer);
 
         // Draw the triangle
-        GLES20.glDrawArrays(GLES20.GL_LINES, 0, mVerticeCount);
+        GLES20.glDrawArrays(GLES20.GL_LINES, 0, mVertexCount);
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);

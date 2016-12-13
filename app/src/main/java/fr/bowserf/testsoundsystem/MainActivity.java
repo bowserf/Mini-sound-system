@@ -133,7 +133,6 @@ public class MainActivity extends AppCompatActivity {
             mToggleStop.setEnabled(true);
             mTvSoundSystemStatus.setText("Extraction ended");
 
-
             final DisplayMetrics metrics = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
