@@ -137,9 +137,9 @@ public class MainActivity extends AppCompatActivity {
             final DisplayMetrics metrics = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
-            // we only want to display 1/20 of all data
-            final short[] extractedData = mSoundSystem.getExtractedData();
-            final short[] reducedData = Arrays.copyOf(extractedData, extractedData.length / 20);
+            // we only want to display 1/40 of all data
+            final short[] extractedData = mSoundSystem.getExtractedDataMono();
+            final short[] reducedData = Arrays.copyOf(extractedData, extractedData.length / 40);
 
             mSpectrum.drawData(reducedData, metrics.widthPixels);
         }
