@@ -68,6 +68,9 @@ void Java_fr_bowserf_soundsystem_SoundSystem_native_1release_1soundsystem(JNIEnv
 }
 
 jshortArray Java_fr_bowserf_soundsystem_SoundSystem_native_1get_1extracted_1data(JNIEnv *env, jclass jclass1) {
+    if(!isSoundSystemInit()){
+        return nullptr;
+    }
     unsigned int length = _soundSystem->getTotalNumberFrames();
     jshort* extractedData = _soundSystem->getExtractedData();
     jshortArray jExtractedData = env->NewShortArray(length);
@@ -79,6 +82,9 @@ jshortArray Java_fr_bowserf_soundsystem_SoundSystem_native_1get_1extracted_1data
 }
 
 jshortArray Java_fr_bowserf_soundsystem_SoundSystem_native_1get_1extracted_1data_1mono(JNIEnv *env, jclass jclass1) {
+    if(!isSoundSystemInit()){
+        return nullptr;
+    }
     unsigned int length = _soundSystem->getTotalNumberFrames();
     jshort* extractedData = _soundSystem->getExtractedDataMono();
     jshortArray jExtractedData = env->NewShortArray(length);
