@@ -33,8 +33,11 @@ class Line {
     private static final String FRAGMENT_SHADER_CODE =
             "precision mediump float;" +
             "uniform vec4 vColor;" +
+            "uniform float width;" +
             "void main() {" +
-                "gl_FragColor = vColor;" +
+                "float color = vColor.r * gl_FragCoord.x / width;" +
+                "vec4 newColor = vec4(color, vColor.g, vColor.b, vColor.a);" +
+                "gl_FragColor = newColor;" +
             "}";
 
     private FloatBuffer mVertexBuffer;
@@ -79,19 +82,21 @@ class Line {
 
         // Set color for drawing the triangle
         GLES20.glUniform4fv(mColorHandle, 1, COLOR, 0);
+
+        // use to play a little bit with fragment shader to change color line
+        final int widthHandle = glGetUniformLocation(program, "width");
+        GLES20.glUniform1f(widthHandle, 540);
     }
 
     /* package */
     void drawData(short[] data, int desiredNumberData){
-        short[] dataLeftChannel = extractLeftChannel(data);
-
         if(mVertexBuffer == null){
-            mNumberDataForAverage = dataLeftChannel.length / desiredNumberData;
+            mNumberDataForAverage = data.length / desiredNumberData;
             mCoordinates = new float[desiredNumberData * COORDS_PER_VERTEX * 2]; // *2 because start point (x,0) and high point (x, y)
             initVertexBuffer(mCoordinates.length);
         }
 
-        generatePoints(dataLeftChannel, desiredNumberData);
+        generatePoints(data, desiredNumberData);
 
         mVertexBuffer.put(mCoordinates);
         // set the buffer to read the first coordinate
@@ -148,14 +153,6 @@ class Line {
         GLES20.glCompileShader(shader);
 
         return shader;
-    }
-
-    private short[] extractLeftChannel(short[] data){
-        final short[] dataLeftChannel = new short[data.length / 2];
-        for(int i = 0 ; i < dataLeftChannel.length ; i++){
-            dataLeftChannel[i] = data[i * 2 + 1];
-        }
-        return dataLeftChannel;
     }
 
     private void generatePoints(final short[] data, final int desiredNumberData){

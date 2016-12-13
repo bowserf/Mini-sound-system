@@ -6,9 +6,8 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 
 /**
- * Created by Frederic on 12/12/2016.
+ * Class used to get audio feature of the current device. Used to optimize sound system performance.
  */
-
 public class AudioFeaturesManager {
 
     @SuppressWarnings("unused")
