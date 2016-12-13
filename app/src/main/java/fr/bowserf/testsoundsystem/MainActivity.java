@@ -1,13 +1,20 @@
 package fr.bowserf.testsoundsystem;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import java.util.Arrays;
 
 import fr.bowserf.soundsystem.SoundSystem;
 import fr.bowserf.soundsystem.listener.SSExtractionObserver;
@@ -23,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressWarnings("unused")
     private static final String TAG = "MainActivity";
+
+    private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
 
     /**
      * UI
@@ -128,8 +137,11 @@ public class MainActivity extends AppCompatActivity {
             final DisplayMetrics metrics = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
-            mSpectrum.drawData(mSoundSystem.getExtractedData(),
-                    metrics.widthPixels);
+            // we only want to display 1/20 of all data
+            final short[] extractedData = mSoundSystem.getExtractedData();
+            final short[] reducedData = Arrays.copyOf(extractedData, extractedData.length / 20);
+
+            mSpectrum.drawData(reducedData, metrics.widthPixels);
         }
     };
 
@@ -159,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.toggle_extract_file:
-                    mSoundSystem.loadFile(FindTrackManager.getTrackPath(MainActivity.this).getPath());
+                    loadTrackOrAskPermission();
                     break;
                 case R.id.btn_stop:
                     mSoundSystem.stopMusic();
@@ -167,6 +179,33 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+
+    private void loadTrackOrAskPermission() {
+        final int permissionCheck = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            mSoundSystem.loadFile(FindTrackManager.getTrackPath(MainActivity.this).getPath());
+        } else {
+            askForReadExternalStoragePermission();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            mSoundSystem.loadFile(FindTrackManager.getTrackPath(MainActivity.this).getPath());
+        } else {
+            Toast.makeText(this, "No permission, no extraction !", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void askForReadExternalStoragePermission() {
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+        }
+    }
 
     private CompoundButton.OnCheckedChangeListener mOnCheckedChangeListener = new CompoundButton.OnCheckedChangeListener() {
         @Override
