@@ -342,17 +342,19 @@ int SoundSystem::getPlayerState() {
 }
 
 void SoundSystem::sendSoundBufferExtract() {
-    SLuint32 result = (*_extractPlayerBufferQueue)->Enqueue(_extractPlayerBufferQueue,
-                                                            _soundBuffer,
-                                                            sizeof(SLuint16) * _bufferSize);
-    assert(result == SL_RESULT_SUCCESS);
+    if(_extractPlayerBufferQueue != nullptr) {
+        SLuint32 result = (*_extractPlayerBufferQueue)->Enqueue(_extractPlayerBufferQueue,
+                                                                _soundBuffer,
+                                                                sizeof(SLuint16) * _bufferSize);
+        SLASSERT(result);
+    }
 }
 
 void SoundSystem::sendSoundBufferPlay() {
     assert(_soundBuffer != NULL);
     SLuint32 result = (*_playerQueue)->Enqueue(_playerQueue, _soundBuffer,
                                                sizeof(SLuint16) * _bufferSize);
-    assert(result == SL_RESULT_SUCCESS);
+    SLASSERT(result);
 }
 
 void SoundSystem::notifyExtractionEnded() {
