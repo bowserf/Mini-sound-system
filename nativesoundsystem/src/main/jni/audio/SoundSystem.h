@@ -66,6 +66,8 @@ public:
 
     void releasePlayer();
 
+    short* getExtractedDataMono();
+
     inline short* getExtractedData(){
         return _extractedData;
     }

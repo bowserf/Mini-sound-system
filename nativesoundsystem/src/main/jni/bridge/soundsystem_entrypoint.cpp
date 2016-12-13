@@ -78,6 +78,17 @@ jshortArray Java_fr_bowserf_soundsystem_SoundSystem_native_1get_1extracted_1data
     return jExtractedData;
 }
 
+jshortArray Java_fr_bowserf_soundsystem_SoundSystem_native_1get_1extracted_1data_1mono(JNIEnv *env, jclass jclass1) {
+    unsigned int length = _soundSystem->getTotalNumberFrames();
+    jshort* extractedData = _soundSystem->getExtractedDataMono();
+    jshortArray jExtractedData = env->NewShortArray(length);
+    if (jExtractedData == nullptr) {
+        return nullptr;
+    }
+    env->SetShortArrayRegion(jExtractedData, 0, length, extractedData);
+    return jExtractedData;
+}
+
 SLDataLocator_AndroidFD getTrackFromAsset(JNIEnv *env, jobject assetManager, jstring filename){
     // convert Java string to UTF-8
     const char *utf8 = env->GetStringUTFChars(filename, NULL);

@@ -438,4 +438,16 @@ void SoundSystem::releasePlayer() {
     }
 }
 
+short *SoundSystem::getExtractedDataMono() {
+    unsigned int sizeDataMono = _totalFrames / 2;
+    short* dataMono = (short*) calloc(sizeof(short), sizeDataMono);
+
+    for(int i = 0 ; i < sizeDataMono ; i++){
+        dataMono[i] = (short)((_extractedData[i * 2] + _extractedData[i * 2 + 1]) / 2);
+    }
+    return dataMono;
+}
+
+
+
 
