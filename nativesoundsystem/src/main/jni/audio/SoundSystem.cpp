@@ -311,7 +311,6 @@ void SoundSystem::play(bool play) {
         if (play
             && (currentState == SL_PLAYSTATE_PAUSED || currentState == SL_PLAYSTATE_STOPPED)) {
             sendSoundBufferPlay();
-            sendSoundBufferPlay();
             result = (*_playerPlay)->SetPlayState(_playerPlay, SL_PLAYSTATE_PLAYING);
             SLASSERT(result);
 
