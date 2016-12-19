@@ -14,7 +14,7 @@ model {
         cppFlags.add("-std=c++11")
         cppFlags.add("-DANDROID_SOUND_SYSTEM")
         stl "stlport_static"
-        platformVersion = 17 //same as minSdkVersion.apiLevel for better compatibility
+        platformVersion = rootProject.ext.minSdkVersion //same as minSdkVersion.apiLevel for better compatibility
     }
 
     android.sources {
