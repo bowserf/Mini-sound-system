@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 /**
  * Class used to get audio feature of the current device. Used to optimize sound system performance.
@@ -61,6 +62,11 @@ public class AudioFeaturesManager {
         if (mFramesPerBuffer == 0) { // Use default
             mFramesPerBuffer = 256;
         }
+
+        Log.i(TAG, "Sample rate : " + mSampleRate);
+        Log.i(TAG, "Frames per buffer : " + mFramesPerBuffer);
+        Log.i(TAG, "Has pro feature : " + mHasProFeature);
+        Log.i(TAG, "Has low latency : " + mHasLowLatencyFeature);
     }
 
     public boolean isHasLowLatencyFeature() {
