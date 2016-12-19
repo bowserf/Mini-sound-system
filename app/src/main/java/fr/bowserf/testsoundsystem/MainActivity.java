@@ -7,6 +7,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -59,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         if(!mSoundSystem.isSoundSystemInit()) {
             mSoundSystem.initSoundSystem(
                     audioFeaturesManager.getSampleRate(),
-                    audioFeaturesManager.getFramesPerBufferInt());
+                    audioFeaturesManager.getFramesPerBuffer());
         }
 
         initUI();
