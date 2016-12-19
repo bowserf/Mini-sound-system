@@ -32,7 +32,7 @@ public class AudioFeaturesManager {
     private boolean mHasLowLatencyFeature;
     private boolean mHasProFeature;
     private int mSampleRate;
-    private int mFramesPerBufferInt;
+    private int mFramesPerBuffer;
 
     private AudioFeaturesManager(@NonNull final Context context){
         getAudioInformation(context);
@@ -57,9 +57,9 @@ public class AudioFeaturesManager {
 
         // get native buffer size
         final String framesPerBuffer = am.getProperty(android.media.AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
-        mFramesPerBufferInt = Integer.parseInt(framesPerBuffer);
-        if (mFramesPerBufferInt == 0) { // Use default
-            mFramesPerBufferInt = 256;
+        mFramesPerBuffer = Integer.parseInt(framesPerBuffer);
+        if (mFramesPerBuffer == 0) { // Use default
+            mFramesPerBuffer = 256;
         }
     }
 
@@ -75,7 +75,7 @@ public class AudioFeaturesManager {
         return mSampleRate;
     }
 
-    public int getFramesPerBufferInt() {
-        return mFramesPerBufferInt;
+    public int getFramesPerBuffer() {
+        return mFramesPerBuffer;
     }
 }
