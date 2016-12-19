@@ -208,7 +208,9 @@ void SoundSystem::initAudioPlayer() {
     SLresult result;
 
     // configure audio source
-    SLDataLocator_AndroidSimpleBufferQueue loc_bufq = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 2};
+    SLDataLocator_AndroidSimpleBufferQueue loc_bufq;
+    loc_bufq.locatorType = SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE;
+    loc_bufq.numBuffers = 1;
 
     // format of data
     SLDataFormat_PCM dataFormat;
@@ -230,9 +232,10 @@ void SoundSystem::initAudioPlayer() {
 
     const SLInterfaceID ids[] = {SL_IID_VOLUME, SL_IID_ANDROIDSIMPLEBUFFERQUEUE};
     const SLboolean req[] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
+    const int numberInterface = sizeof(ids)/sizeof(ids[0]);
 
     result = (*mEngine)->CreateAudioPlayer(mEngine, &_playerObject, &audioSrc, &audioSnk,
-                                           2, ids, req);
+                                           numberInterface, ids, req);
     // note that an invalid URI is not detected here, but during prepare/prefetch on Android,
     // or possibly during Realize on other platforms
     assert(result);
