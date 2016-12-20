@@ -32,7 +32,7 @@ public class SpectrumGLSurfaceView extends GLSurfaceView {
 
         // can only be call after setRenderer
         // redraw the GLView at each frame, even if there is no change.
-        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
     }
 
     public void drawData(short[] data, int desiredNumberData){
