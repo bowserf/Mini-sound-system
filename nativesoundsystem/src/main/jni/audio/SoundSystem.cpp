@@ -38,18 +38,18 @@ void SoundSystem::fillDataBuffer() {
         _extractedData = (short*) calloc(_totalFrames * 2, sizeof(short));
     }
 
-    int sizeBuffer = _bufferSize * sizeof(SLuint16);
+    int sizeBuffer = _bufferSize * sizeof(short);
     memmove(_extractedData + _positionExtract, _soundBuffer, sizeBuffer);
     _positionExtract += _bufferSize;
 }
 
 void SoundSystem::getData() {
-    if (_positionPlay > _totalFrames * 2 * sizeof(SLuint16)) {
+    if (_positionPlay > _totalFrames * 2 * sizeof(short)) {
         endTrack();
         return;
     }
 
-    int sizeBuffer = _bufferSize * sizeof(SLuint16);
+    int sizeBuffer = _bufferSize * sizeof(short);
     memmove(_soundBuffer, _extractedData + _positionPlay, sizeBuffer);
     _positionPlay += _bufferSize;
 }
@@ -347,7 +347,7 @@ void SoundSystem::sendSoundBufferExtract() {
     if(_extractPlayerBufferQueue != nullptr) {
         SLuint32 result = (*_extractPlayerBufferQueue)->Enqueue(_extractPlayerBufferQueue,
                                                                 _soundBuffer,
-                                                                sizeof(SLuint16) * _bufferSize);
+                                                                sizeof(short) * _bufferSize);
         SLASSERT(result);
     }
 }
@@ -355,7 +355,7 @@ void SoundSystem::sendSoundBufferExtract() {
 void SoundSystem::sendSoundBufferPlay() {
     assert(_soundBuffer != NULL);
     SLuint32 result = (*_playerQueue)->Enqueue(_playerQueue, _soundBuffer,
-                                               sizeof(SLuint16) * _bufferSize);
+                                               sizeof(short) * _bufferSize);
     SLASSERT(result);
 }
 
