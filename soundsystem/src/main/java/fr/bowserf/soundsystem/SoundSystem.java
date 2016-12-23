@@ -113,6 +113,14 @@ public class SoundSystem {
     }
 
     /**
+     * Get if a track has been loaded .
+     * @return True if a track is loaded.
+     */
+    public boolean isLoaded(){
+        return native_is_loaded();
+    }
+
+    /**
      * Stop music.
      */
     public void stopMusic() {
@@ -276,6 +284,8 @@ public class SoundSystem {
     private native void native_play(boolean play);
 
     private native boolean native_is_playing();
+
+    private native boolean native_is_loaded();
 
     private native void native_stop();
 

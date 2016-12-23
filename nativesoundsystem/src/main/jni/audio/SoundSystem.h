@@ -18,9 +18,6 @@
 // Access to malloc, free etc...
 #include <malloc.h>
 
-// NULL
-#include <cstring>
-
 #include "listener/SoundSystemCallback.h"
 
 static void extractionEndCallback(SLPlayItf caller, void *pContext, SLuint32 event);
@@ -76,6 +73,14 @@ public:
         return _totalFrames;
     }
 
+    inline bool isLoaded(){
+        return _isLoaded;
+    }
+
+    inline void setIsLoaded(bool isLoaded){
+        _isLoaded = isLoaded;
+    }
+
     //------------------------
     // - Extraction methods -
     //------------------------
@@ -90,41 +95,51 @@ public:
     void notifyEndOfTrack();
 
 private :
+
     void extractMetaData();
 
+    // device features
     int _sampleRate;
     int _bufferSize;
-    unsigned int _totalFrames;
+
+    // positions used during extraction and play of the track
     int _positionExtract;
     int _positionPlay;
-    bool _needExtractInitialisation;
-    SLmillisecond  _musicDuration = NULL;
 
-    SoundSystemCallback *_soundSystemCallback = NULL;
+    bool _isLoaded;
+
+    bool _needExtractInitialisation;
+
+    // extracted track info
+    SLmillisecond  _musicDuration = 0;
+    unsigned int _totalFrames;
+
+    // object used to notify of some events
+    SoundSystemCallback *_soundSystemCallback = nullptr;
 
     // engine
-    SLObjectItf mEngineObj = NULL;
-    SLEngineItf mEngine = NULL;
+    SLObjectItf _engineObj = nullptr;
+    SLEngineItf _engine = nullptr;
 
     // output
-    SLObjectItf mOutPutMixObj = NULL;
+    SLObjectItf _outPutMixObj = nullptr;
 
     //extract
-    SLObjectItf _extractPlayerObject = NULL;
-    SLPlayItf _extractPlayerPlay = NULL;
-    SLAndroidSimpleBufferQueueItf _extractPlayerBufferQueue = NULL;
-    SLMetadataExtractionItf _extractPlayerMetadata = NULL;
+    SLObjectItf _extractPlayerObject = nullptr;
+    SLPlayItf _extractPlayerPlay = nullptr;
+    SLAndroidSimpleBufferQueueItf _extractPlayerBufferQueue = nullptr;
+    SLMetadataExtractionItf _extractPlayerMetadata = nullptr;
 
     //play
-    SLObjectItf _playerObject = NULL;
-    SLPlayItf _playerPlay = NULL;
-    SLAndroidSimpleBufferQueueItf _playerQueue = NULL;
+    SLObjectItf _playerObject = nullptr;
+    SLPlayItf _playerPlay = nullptr;
+    SLAndroidSimpleBufferQueueItf _playerQueue = nullptr;
 
     //buffer
-    short*_soundBuffer = NULL;
+    short*_soundBuffer = nullptr;
 
     //extracted music
-    short* _extractedData = NULL;
+    short* _extractedData = nullptr;
 };
 
 #endif //TEST_SOUNDSYSTEM_SOUNDSYSTEM_H

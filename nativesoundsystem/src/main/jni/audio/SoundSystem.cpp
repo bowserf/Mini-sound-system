@@ -4,6 +4,7 @@
 static void extractionEndCallback(SLPlayItf caller, void *pContext, SLuint32 event) {
     if (event & SL_PLAYEVENT_HEADATEND) {
         SoundSystem *self = static_cast<SoundSystem *>(pContext);
+        self->setIsLoaded(true);
         self->notifyExtractionEnded();
     }
 }
@@ -59,6 +60,7 @@ SoundSystem::SoundSystem(SoundSystemCallback *callback,
                          int bufSize) :
         _soundSystemCallback(callback),
         _needExtractInitialisation(true),
+        _isLoaded(false),
         _positionExtract(0),
         _positionPlay(0),
         _totalFrames(0) {
@@ -86,17 +88,17 @@ SoundSystem::SoundSystem(SoundSystemCallback *callback,
      and the state of these resources. To allocate the resources the object must be Realized.*/
 
     // create engine
-    result = slCreateEngine(&mEngineObj, 0, NULL, engineMixIIDCount, engineMixIIDs, engineMixReqs);
+    result = slCreateEngine(&_engineObj, 0, nullptr, engineMixIIDCount, engineMixIIDs, engineMixReqs);
     SLASSERT(result);
 
     // 2nd parameter : True if it's asynchronous and false to be synchronous
-    result = (*mEngineObj)->Realize(mEngineObj, SL_BOOLEAN_FALSE);
+    result = (*_engineObj)->Realize(_engineObj, SL_BOOLEAN_FALSE);
     SLASSERT(result);
 
     // interface : an abstraction of a set of related features that a certain object provides.
 
     // get interfaces
-    result = (*mEngineObj)->GetInterface(mEngineObj, SL_IID_ENGINE, &mEngine);
+    result = (*_engineObj)->GetInterface(_engineObj, SL_IID_ENGINE, &_engine);
     SLASSERT(result);
 
     // creation of objects used to send data to HW device
@@ -106,11 +108,11 @@ SoundSystem::SoundSystem(SoundSystemCallback *callback,
     const SLInterfaceID outputMixIIDs[] = {};
     const SLboolean outputMixReqs[] = {};
 
-    result = (*mEngine)->CreateOutputMix(mEngine, &mOutPutMixObj, outputMixIIDCount, outputMixIIDs,
+    result = (*_engine)->CreateOutputMix(_engine, &_outPutMixObj, outputMixIIDCount, outputMixIIDs,
                                          outputMixReqs);
     SLASSERT(result);
 
-    result = (*mOutPutMixObj)->Realize(mOutPutMixObj, SL_BOOLEAN_FALSE);
+    result = (*_outPutMixObj)->Realize(_outPutMixObj, SL_BOOLEAN_FALSE);
     SLASSERT(result);
 }
 
@@ -123,7 +125,7 @@ void SoundSystem::extractMusic(SLDataLocator_URI *fileLoc) {
 
     SLDataFormat_MIME format_mime;
     format_mime.formatType = SL_DATAFORMAT_MIME;
-    format_mime.mimeType = NULL;
+    format_mime.mimeType = nullptr;
     format_mime.containerType = SL_CONTAINERTYPE_UNSPECIFIED;
 
     SLDataSource audioSrc;
@@ -155,7 +157,7 @@ void SoundSystem::extractMusic(SLDataLocator_URI *fileLoc) {
                                              SL_IID_METADATAEXTRACTION};
     const SLboolean soundPlayerReqs[] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
 
-    result = (*mEngine)->CreateAudioPlayer(mEngine, &_extractPlayerObject, &audioSrc, &audioSnk,
+    result = (*_engine)->CreateAudioPlayer(_engine, &_extractPlayerObject, &audioSrc, &audioSnk,
                                            soundPlayerIIDCount, soundPlayerIIDs, soundPlayerReqs);
     SLASSERT(result);
 
@@ -202,6 +204,8 @@ void SoundSystem::extractMusic(SLDataLocator_URI *fileLoc) {
     SLASSERT(result);
 
     notifyExtractionStarted();
+
+    _isLoaded = false;
 }
 
 void SoundSystem::initAudioPlayer() {
@@ -227,14 +231,14 @@ void SoundSystem::initAudioPlayer() {
     audioSrc.pFormat = &dataFormat;
 
     // configure audio sink
-    SLDataLocator_OutputMix loc_outmix = {SL_DATALOCATOR_OUTPUTMIX, mOutPutMixObj};
-    SLDataSink audioSnk = {&loc_outmix, NULL};
+    SLDataLocator_OutputMix loc_outmix = {SL_DATALOCATOR_OUTPUTMIX, _outPutMixObj};
+    SLDataSink audioSnk = {&loc_outmix, nullptr};
 
     const SLInterfaceID ids[] = {SL_IID_VOLUME, SL_IID_ANDROIDSIMPLEBUFFERQUEUE};
     const SLboolean req[] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
     const int numberInterface = sizeof(ids)/sizeof(ids[0]);
 
-    result = (*mEngine)->CreateAudioPlayer(mEngine, &_playerObject, &audioSrc, &audioSnk,
+    result = (*_engine)->CreateAudioPlayer(_engine, &_playerObject, &audioSrc, &audioSnk,
                                            numberInterface, ids, req);
     // note that an invalid URI is not detected here, but during prepare/prefetch on Android,
     // or possibly during Realize on other platforms
@@ -261,7 +265,7 @@ bool SoundSystem::isPlaying(){
 }
 
 void SoundSystem::extractAndPlayDirectly(void *sourceFile) {
-    if(_playerPlay != NULL && isPlaying()){
+    if(_playerPlay != nullptr && isPlaying()){
         return;
     }
 
@@ -269,7 +273,7 @@ void SoundSystem::extractAndPlayDirectly(void *sourceFile) {
 
     SLDataFormat_MIME format_mime;
     format_mime.formatType = SL_DATAFORMAT_MIME;
-    format_mime.mimeType = NULL;
+    format_mime.mimeType = nullptr;
     format_mime.containerType = SL_CONTAINERTYPE_UNSPECIFIED;
 
     SLDataSource audioSrc;
@@ -277,11 +281,11 @@ void SoundSystem::extractAndPlayDirectly(void *sourceFile) {
     audioSrc.pFormat = &format_mime;
 
     // configure audio sink
-    SLDataLocator_OutputMix loc_outmix = {SL_DATALOCATOR_OUTPUTMIX, mOutPutMixObj};
-    SLDataSink audioSnk = {&loc_outmix, NULL};
+    SLDataLocator_OutputMix loc_outmix = {SL_DATALOCATOR_OUTPUTMIX, _outPutMixObj};
+    SLDataSink audioSnk = {&loc_outmix, nullptr};
 
-    result = (*mEngine)->CreateAudioPlayer(mEngine, &_playerObject, &audioSrc, &audioSnk,
-                                           0, NULL, NULL);
+    result = (*_engine)->CreateAudioPlayer(_engine, &_playerObject, &audioSrc, &audioSnk,
+                                           0, nullptr, nullptr);
     SLASSERT(result);
 
     // realize the player
@@ -308,7 +312,7 @@ void SoundSystem::extractMetaData() {
 
 void SoundSystem::play(bool play) {
     SLresult result;
-    if (NULL != _playerPlay) {
+    if (nullptr != _playerPlay) {
         SLuint32 currentState;
         (*_playerPlay)->GetPlayState(_playerPlay, &currentState);
         if (play
@@ -335,7 +339,7 @@ void SoundSystem::stop() {
 };
 
 int SoundSystem::getPlayerState() {
-    if(_playerPlay != NULL) {
+    if(_playerPlay != nullptr) {
         SLuint32 currentState;
         (*_playerPlay)->GetPlayState(_playerPlay, &currentState);
         return currentState;
@@ -353,7 +357,7 @@ void SoundSystem::sendSoundBufferExtract() {
 }
 
 void SoundSystem::sendSoundBufferPlay() {
-    assert(_soundBuffer != NULL);
+    assert(_soundBuffer != nullptr);
     SLuint32 result = (*_playerQueue)->Enqueue(_playerQueue, _soundBuffer,
                                                sizeof(short) * _bufferSize);
     SLASSERT(result);
@@ -389,56 +393,56 @@ void SoundSystem::release() {
     // destroy sound player
     stopSoundPlayer();
 
-    if (mOutPutMixObj != NULL) {
-        (*mOutPutMixObj)->Destroy(mOutPutMixObj);
-        mOutPutMixObj = NULL;
+    if (_outPutMixObj != nullptr) {
+        (*_outPutMixObj)->Destroy(_outPutMixObj);
+        _outPutMixObj = nullptr;
     }
 
-    if (mEngineObj != NULL) {
-        (*mEngineObj)->Destroy(mEngineObj);
-        mEngineObj = NULL;
-        mEngine = NULL;
+    if (_engineObj != nullptr) {
+        (*_engineObj)->Destroy(_engineObj);
+        _engineObj = nullptr;
+        _engine = nullptr;
     }
 }
 
 void SoundSystem::stopSoundPlayer() {
-    if (_playerObject != NULL) {
+    if (_playerObject != nullptr) {
         SLuint32 soundPlayerState;
         (*_playerObject)->GetState(_playerObject, &soundPlayerState);
         if (soundPlayerState == SL_OBJECT_STATE_REALIZED) {
-            if (_extractPlayerBufferQueue != NULL) {
+            if (_extractPlayerBufferQueue != nullptr) {
                 (*_extractPlayerBufferQueue)->Clear(_extractPlayerBufferQueue);
-                _extractPlayerBufferQueue = NULL;
+                _extractPlayerBufferQueue = nullptr;
             }
 
-            if (_playerQueue != NULL) {
+            if (_playerQueue != nullptr) {
                 (*_playerQueue)->Clear(_playerQueue);
-                _playerQueue = NULL;
+                _playerQueue = nullptr;
             }
 
-            if (_extractPlayerObject != NULL) {
+            if (_extractPlayerObject != nullptr) {
                 (*_extractPlayerObject)->AbortAsyncOperation(_extractPlayerObject);
                 (*_extractPlayerObject)->Destroy(_extractPlayerObject);
-                _extractPlayerObject = NULL;
-                _extractPlayerPlay = NULL;
+                _extractPlayerObject = nullptr;
+                _extractPlayerPlay = nullptr;
             }
 
             releasePlayer();
 
-            if(_soundBuffer != NULL){
+            if(_soundBuffer != nullptr){
                 free(_soundBuffer);
-                _soundBuffer = NULL;
+                _soundBuffer = nullptr;
             }
         }
     }
 }
 
 void SoundSystem::releasePlayer() {
-    if (_playerObject != NULL) {
+    if (_playerObject != nullptr) {
         (*_playerObject)->AbortAsyncOperation(_playerObject);
         (*_playerObject)->Destroy(_playerObject);
-        _playerObject = NULL;
-        _playerPlay = NULL;
+        _playerObject = nullptr;
+        _playerPlay = nullptr;
     }
 }
 

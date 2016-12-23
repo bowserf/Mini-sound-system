@@ -15,12 +15,12 @@ class Line {
     private static final String TAG = "Line";
 
     // number of coordinates per vertex in this array
-    private static final int COORDS_PER_VERTEX = 3;
+    private static final int COORDS_PER_VERTEX = 2;
 
     private static final int VERTEX_STRIDE = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
     // Set color with red, green, blue and alpha (opacity) values
-    private static float[] COLOR = { 0.63671875f, 0.76953125f, 0.22265625f, 1.0f };
+    private static float[] COLOR = {0.63671875f, 0.76953125f, 0.22265625f};
 
     // Vertex shader is used to render the vertices of a shape
     private static final String VERTEX_SHADER_CODE =
@@ -32,11 +32,11 @@ class Line {
     // Fragment shader is used to render the face of a shape with colors or textures
     private static final String FRAGMENT_SHADER_CODE =
             "precision mediump float;" +
-            "uniform vec4 vColor;" +
+            "uniform vec3 vColor;" +
             "uniform float width;" +
             "void main() {" +
                 "float color = vColor.r * gl_FragCoord.x / width;" +
-                "vec4 newColor = vec4(color, vColor.g, vColor.b, vColor.a);" +
+                "vec4 newColor = vec4(color, vColor.g, vColor.b, 1);" +
                 "gl_FragColor = newColor;" +
             "}";
 
@@ -72,6 +72,9 @@ class Line {
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(program);
 
+        // disable depth to improve performances
+        GLES20.glDepthMask(false);
+
         // get handle to vertex shader's vPosition member
         mPositionHandle = GLES20.glGetAttribLocation(program, "vPosition");
 
@@ -79,11 +82,23 @@ class Line {
         int colorHandle = glGetUniformLocation(program, "vColor");
 
         // Set color for drawing the triangle
-        GLES20.glUniform4fv(colorHandle, 1, COLOR, 0);
+        GLES20.glUniform3fv(colorHandle, 1, COLOR, 0);
 
         // use to play a little bit with fragment shader to change color line
         final int widthHandle = glGetUniformLocation(program, "width");
         GLES20.glUniform1f(widthHandle, 540);
+    }
+
+    private int loadShader(int type, String shaderCode){
+        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
+        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
+        int shader = GLES20.glCreateShader(type);
+
+        // add the source code to the shader and compile it
+        GLES20.glShaderSource(shader, shaderCode);
+        GLES20.glCompileShader(shader);
+
+        return shader;
     }
 
     /* package */
@@ -140,30 +155,16 @@ class Line {
         GLES20.glDisableVertexAttribArray(mPositionHandle);
     }
 
-    private int loadShader(int type, String shaderCode){
-        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
-        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
-        int shader = GLES20.glCreateShader(type);
-
-        // add the source code to the shader and compile it
-        GLES20.glShaderSource(shader, shaderCode);
-        GLES20.glCompileShader(shader);
-
-        return shader;
-    }
-
     private void generatePoints(final short[] data, final int desiredNumberData){
         for(int i = 0 ; i < desiredNumberData ; i++){
             final float x = i / (float)(desiredNumberData/2) - 1;
             // bottom point
-            mCoordinates[i * 6] = x;
-            mCoordinates[i * 6 + 1] = 0;
-            mCoordinates[i * 6 + 2] = 0;
+            mCoordinates[i * 4] = x;
+            mCoordinates[i * 4 + 1] = 0;
 
             // vertical point
-            mCoordinates[i * 6 + 3] = x;
-            mCoordinates[i * 6 + 4] = computeAverageValue(data, i);
-            mCoordinates[i * 6 + 5] = 0.f;
+            mCoordinates[i * 4 + 2] = x;
+            mCoordinates[i * 4 + 3] = computeAverageValue(data, i);
         }
     }
 
