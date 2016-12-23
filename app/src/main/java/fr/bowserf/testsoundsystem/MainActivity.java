@@ -54,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
 
         final AudioFeaturesManager audioFeaturesManager = AudioFeaturesManager.init(this);
 
-
         mSoundSystem = SoundSystem.getInstance(this);
         if(!mSoundSystem.isSoundSystemInit()) {
             mSoundSystem.initSoundSystem(
@@ -83,8 +82,15 @@ public class MainActivity extends AppCompatActivity {
         //tv sound system status
         mTvSoundSystemStatus = (TextView) findViewById(R.id.tv_sound_system_status);
 
-        mTogglePlayPause.setEnabled(false);
-        mToggleStop.setEnabled(false);
+        if(mSoundSystem.isLoaded()){
+            mTogglePlayPause.setEnabled(true);
+            mToggleStop.setEnabled(true);
+            mBtnExtractFile.setEnabled(false);
+        }else{
+            mBtnExtractFile.setEnabled(true);
+            mTogglePlayPause.setEnabled(false);
+            mToggleStop.setEnabled(false);
+        }
 
         mTogglePlayPause.setChecked(mSoundSystem.isPlaying());
 
@@ -105,8 +111,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        detachListeners();
-        mSoundSystem.release();
+        if(!isChangingConfigurations()) {
+            detachListeners();
+            mSoundSystem.release();
+        }
         super.onDestroy();
     }
 
@@ -199,7 +207,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void askForReadExternalStoragePermission() {
-        // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},

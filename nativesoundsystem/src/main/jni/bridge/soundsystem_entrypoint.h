@@ -25,11 +25,12 @@
 
 #include "listener/SoundSystemCallback.h"
 
-static SoundSystem *_soundSystem;
+static SoundSystem* _soundSystem;
 
-static SoundSystemCallback *_soundSystemCallback;
+static SoundSystemCallback* _soundSystemCallback;
 
 extern "C" {
+
     void Java_fr_bowserf_soundsystem_SoundSystem_native_1init_1soundsystem(JNIEnv *env,
                                                                            jclass jclass1,
                                                                            jint sample_rate,
@@ -42,6 +43,8 @@ extern "C" {
     void Java_fr_bowserf_soundsystem_SoundSystem_native_1play(JNIEnv *env, jclass jclass1, jboolean play);
 
     jboolean Java_fr_bowserf_soundsystem_SoundSystem_native_1is_1playing(JNIEnv *env, jclass jclass1);
+
+    jboolean Java_fr_bowserf_soundsystem_SoundSystem_native_1is_1loaded(JNIEnv *env, jclass jclass1);
 
     jboolean Java_fr_bowserf_soundsystem_SoundSystem_native_1is_1soundsystem_1init(JNIEnv *env, jclass jclass1);
 
