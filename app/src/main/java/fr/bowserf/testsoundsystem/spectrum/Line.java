@@ -5,7 +5,10 @@ import android.opengl.GLES20;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
+import static android.opengl.GLES20.GL_ARRAY_BUFFER;
+import static android.opengl.GLES20.GL_STATIC_DRAW;
 import static android.opengl.GLES20.glGetUniformLocation;
 
 /* package */
@@ -50,6 +53,10 @@ class Line {
 
     private float[] mCoordinates;
 
+    private boolean mIsInitialized;
+
+    private IntBuffer mIdVbo;
+
     /* package */
     Line() {
         int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER,
@@ -87,6 +94,8 @@ class Line {
         // use to play a little bit with fragment shader to change color line
         final int widthHandle = glGetUniformLocation(program, "width");
         GLES20.glUniform1f(widthHandle, 540);
+
+        mIdVbo = IntBuffer.allocate(1);
     }
 
     private int loadShader(int type, String shaderCode){
@@ -137,8 +146,17 @@ class Line {
             return;
         }
 
-        // Enable a handle to the vertices
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
+        if(!mIsInitialized){
+            mIsInitialized = true;
+
+            GLES20.glGenBuffers(1, mIdVbo);
+            GLES20.glBindBuffer(GL_ARRAY_BUFFER, mIdVbo.get(0));
+            GLES20.glBufferData(GL_ARRAY_BUFFER, mCoordinates.length * 4, null, GL_STATIC_DRAW);
+            GLES20.glBufferSubData(GL_ARRAY_BUFFER, 0, mCoordinates.length * 4, mVertexBuffer);
+            GLES20.glBindBuffer(GL_ARRAY_BUFFER, 0);
+        }
+
+        GLES20.glBindBuffer(GL_ARRAY_BUFFER, mIdVbo.get(0));
 
         // Prepare the triangle coordinate data
         GLES20.glVertexAttribPointer(mPositionHandle,
@@ -146,7 +164,12 @@ class Line {
                 GLES20.GL_FLOAT,
                 false,
                 VERTEX_STRIDE,
-                mVertexBuffer);
+                mIdVbo.get(0));
+
+        GLES20.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        // Enable a handle to the vertices
+        GLES20.glEnableVertexAttribArray(mPositionHandle);
 
         // Draw the triangle
         GLES20.glDrawArrays(GLES20.GL_LINES, 0, mVertexCount);
