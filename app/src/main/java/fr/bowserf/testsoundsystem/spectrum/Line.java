@@ -72,6 +72,9 @@ class Line {
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(program);
 
+        // disable depth to improve performances
+        GLES20.glDepthMask(false);
+
         // get handle to vertex shader's vPosition member
         mPositionHandle = GLES20.glGetAttribLocation(program, "vPosition");
 
