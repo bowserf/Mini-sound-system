@@ -24,7 +24,14 @@ public class SpectrumGLSurfaceView extends GLSurfaceView {
         setEGLContextClientVersion(2);
 
         // can only be call before setRenderer
-        setEGLContextFactory(new ContextFactory());
+        GLSurfaceView.EGLContextFactory eglContextFactory = new ContextFactoryV3();
+        try {
+            setEGLContextFactory(eglContextFactory);
+        }catch (RuntimeException e){
+            Log.e(TAG, e.getMessage());
+            eglContextFactory = new ContextFactoryV2();
+            setEGLContextFactory(eglContextFactory);
+        }
         //setEGLConfigChooser(8, 8, 8, 8, 16, 8);
 
         mRenderer = new SpectrumRenderer();
