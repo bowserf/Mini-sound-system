@@ -22,6 +22,8 @@ class Line {
 
     private static final int VERTEX_STRIDE = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
+    private static final int FLOAT_SIZE_IN_BYTE = 4;
+
     // Set color with red, green, blue and alpha (opacity) values
     private static float[] COLOR = {0.63671875f, 0.76953125f, 0.22265625f};
 
@@ -151,12 +153,15 @@ class Line {
 
             GLES20.glGenBuffers(1, mIdVbo);
             GLES20.glBindBuffer(GL_ARRAY_BUFFER, mIdVbo.get(0));
-            GLES20.glBufferData(GL_ARRAY_BUFFER, mCoordinates.length * 4, null, GL_STATIC_DRAW);
-            GLES20.glBufferSubData(GL_ARRAY_BUFFER, 0, mCoordinates.length * 4, mVertexBuffer);
+            // reserver mCoordinates.length * FLOAT_SIZE_IN_BYTE bytes inside GPU RAM.
+            GLES20.glBufferData(GL_ARRAY_BUFFER, mCoordinates.length * FLOAT_SIZE_IN_BYTE, null, GL_STATIC_DRAW);
             GLES20.glBindBuffer(GL_ARRAY_BUFFER, 0);
         }
 
         GLES20.glBindBuffer(GL_ARRAY_BUFFER, mIdVbo.get(0));
+
+        // update data on GPU RAM
+        GLES20.glBufferSubData(GL_ARRAY_BUFFER, 0, mCoordinates.length * FLOAT_SIZE_IN_BYTE, mVertexBuffer);
 
         // Prepare the triangle coordinate data
         GLES20.glVertexAttribPointer(mPositionHandle,
@@ -164,9 +169,7 @@ class Line {
                 GLES20.GL_FLOAT,
                 false,
                 VERTEX_STRIDE,
-                mIdVbo.get(0));
-
-        GLES20.glBindBuffer(GL_ARRAY_BUFFER, 0);
+                0);
 
         // Enable a handle to the vertices
         GLES20.glEnableVertexAttribArray(mPositionHandle);
@@ -176,6 +179,8 @@ class Line {
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
+
+        GLES20.glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
     private void generatePoints(final short[] data, final int desiredNumberData){

@@ -14,6 +14,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import java.util.Arrays;
+
 import fr.bowserf.soundsystem.SoundSystem;
 import fr.bowserf.soundsystem.listener.SSExtractionObserver;
 import fr.bowserf.soundsystem.listener.SSPlayingStatusObserver;
@@ -143,12 +145,10 @@ public class MainActivity extends AppCompatActivity {
             getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
             // we only want to display 1/40 of all data
-            //final short[] extractedData = mSoundSystem.getExtractedDataMono();
-            //final short[] reducedData = Arrays.copyOf(extractedData, extractedData.length / 400);
-            final short[] reducedData = new short[]{0};
+            final short[] extractedData = mSoundSystem.getExtractedDataMono();
+            final short[] reducedData = Arrays.copyOf(extractedData, extractedData.length / 40);
 
-            //mSpectrum.drawData(reducedData, metrics.widthPixels);
-            mSpectrum.drawData(reducedData, 1);
+            mSpectrum.drawData(reducedData, metrics.widthPixels);
             mSpectrum.requestRender();
         }
     };
