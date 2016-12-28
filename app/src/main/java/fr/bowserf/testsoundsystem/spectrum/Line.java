@@ -1,15 +1,13 @@
 package fr.bowserf.testsoundsystem.spectrum;
 
 import android.opengl.GLES20;
+import android.opengl.GLES30;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-import static android.opengl.GLES20.GL_ARRAY_BUFFER;
-import static android.opengl.GLES20.GL_STATIC_DRAW;
-import static android.opengl.GLES20.glGetUniformLocation;
 
 /* package */
 class Line {
@@ -58,6 +56,7 @@ class Line {
     private boolean mIsInitialized;
 
     private IntBuffer mIdVbo;
+    private IntBuffer mIdVao;
 
     /* package */
     Line() {
@@ -88,16 +87,17 @@ class Line {
         mPositionHandle = GLES20.glGetAttribLocation(program, "vPosition");
 
         // get handle to fragment shader's vColor member
-        int colorHandle = glGetUniformLocation(program, "vColor");
+        int colorHandle = GLES20.glGetUniformLocation(program, "vColor");
 
         // Set color for drawing the triangle
         GLES20.glUniform3fv(colorHandle, 1, COLOR, 0);
 
         // use to play a little bit with fragment shader to change color line
-        final int widthHandle = glGetUniformLocation(program, "width");
+        final int widthHandle = GLES20.glGetUniformLocation(program, "width");
         GLES20.glUniform1f(widthHandle, 540);
 
         mIdVbo = IntBuffer.allocate(1);
+        mIdVao = IntBuffer.allocate(1);
     }
 
     private int loadShader(int type, String shaderCode){
@@ -151,36 +151,50 @@ class Line {
         if(!mIsInitialized){
             mIsInitialized = true;
 
+            if(GLES20.glIsBuffer(mIdVbo.get(0))){
+                GLES20.glDeleteBuffers(1, mIdVbo);
+            }
+
+            if(GLES30.glIsVertexArray(mIdVao.get(0))){
+                GLES30.glDeleteVertexArrays(1, mIdVao);
+            }
+
             GLES20.glGenBuffers(1, mIdVbo);
-            GLES20.glBindBuffer(GL_ARRAY_BUFFER, mIdVbo.get(0));
+
+            GLES30.glGenVertexArrays(1, mIdVao);
+
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mIdVbo.get(0));
+
             // reserver mCoordinates.length * FLOAT_SIZE_IN_BYTE bytes inside GPU RAM.
-            GLES20.glBufferData(GL_ARRAY_BUFFER, mCoordinates.length * FLOAT_SIZE_IN_BYTE, null, GL_STATIC_DRAW);
-            GLES20.glBindBuffer(GL_ARRAY_BUFFER, 0);
+            GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, mCoordinates.length * FLOAT_SIZE_IN_BYTE, null, GLES20.GL_STATIC_DRAW);
+
+            // update data on GPU RAM
+            GLES20.glBufferSubData(GLES20.GL_ARRAY_BUFFER, 0, mCoordinates.length * FLOAT_SIZE_IN_BYTE, mVertexBuffer);
+
+            GLES30.glBindVertexArray(mIdVao.get(0));
+
+            // Prepare the triangle coordinate data
+            GLES20.glVertexAttribPointer(mPositionHandle,
+                    COORDS_PER_VERTEX,
+                    GLES20.GL_FLOAT,
+                    false,
+                    VERTEX_STRIDE,
+                    0);
+
+            // Enable a handle to the vertices
+            GLES20.glEnableVertexAttribArray(mPositionHandle);
+
+            GLES30.glBindVertexArray(0);
+
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
         }
 
-        GLES20.glBindBuffer(GL_ARRAY_BUFFER, mIdVbo.get(0));
 
-        // update data on GPU RAM
-        GLES20.glBufferSubData(GL_ARRAY_BUFFER, 0, mCoordinates.length * FLOAT_SIZE_IN_BYTE, mVertexBuffer);
-
-        // Prepare the triangle coordinate data
-        GLES20.glVertexAttribPointer(mPositionHandle,
-                COORDS_PER_VERTEX,
-                GLES20.GL_FLOAT,
-                false,
-                VERTEX_STRIDE,
-                0);
-
-        // Enable a handle to the vertices
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
-
+        GLES30.glBindVertexArray(mIdVao.get(0));
         // Draw the triangle
         GLES20.glDrawArrays(GLES20.GL_LINES, 0, mVertexCount);
 
-        // Disable vertex array
-        GLES20.glDisableVertexAttribArray(mPositionHandle);
-
-        GLES20.glBindBuffer(GL_ARRAY_BUFFER, 0);
+        GLES30.glBindVertexArray(0);
     }
 
     private void generatePoints(final short[] data, final int desiredNumberData){
