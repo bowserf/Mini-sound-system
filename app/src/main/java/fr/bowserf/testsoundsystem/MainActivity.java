@@ -33,12 +33,15 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
 
+    private static final int MUSIC_LENGTH_DIVISION = 40;
+
     /**
      * UI
      */
     private Button mToggleStop;
     private Button mBtnExtractFile;
     private TextView mTvSoundSystemStatus;
+    private TextView mTvPercentageDisplayed;
     private ToggleButton mTogglePlayPause;
     private SpectrumGLSurfaceView mSpectrum;
 
@@ -67,11 +70,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initUI() {
-        //extract button
+        // extract button
         mBtnExtractFile = (Button) findViewById(R.id.toggle_extract_file);
         mBtnExtractFile.setOnClickListener(mOnClickListener);
 
-        //play pause button
+        // play pause button
         mTogglePlayPause = (ToggleButton) findViewById(R.id.toggle_play_pause);
         mTogglePlayPause.setOnCheckedChangeListener(mOnCheckedChangeListener);
 
@@ -79,8 +82,11 @@ public class MainActivity extends AppCompatActivity {
         mToggleStop = (Button) findViewById(R.id.btn_stop);
         mToggleStop.setOnClickListener(mOnClickListener);
 
-        //tv sound system status
+        // tv sound system status
         mTvSoundSystemStatus = (TextView) findViewById(R.id.tv_sound_system_status);
+
+        // tv percentage displayed
+        mTvPercentageDisplayed = (TextView) findViewById(R.id.tv_percentage_displayed);
 
         if(mSoundSystem.isLoaded()){
             mTogglePlayPause.setEnabled(true);
@@ -141,12 +147,15 @@ public class MainActivity extends AppCompatActivity {
             mToggleStop.setEnabled(true);
             mTvSoundSystemStatus.setText("Extraction ended");
 
+            mTvPercentageDisplayed.setVisibility(View.VISIBLE);
+            mTvPercentageDisplayed.setText("Music displayed : 1 / " + MUSIC_LENGTH_DIVISION + " of the total length");
+
             final DisplayMetrics metrics = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
             // we only want to display 1/40 of all data
             final short[] extractedData = mSoundSystem.getExtractedDataMono();
-            final short[] reducedData = Arrays.copyOf(extractedData, extractedData.length / 40);
+            final short[] reducedData = Arrays.copyOf(extractedData, extractedData.length / MUSIC_LENGTH_DIVISION);
 
             mSpectrum.drawData(reducedData, metrics.widthPixels);
             mSpectrum.requestRender();
