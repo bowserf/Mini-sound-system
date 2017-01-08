@@ -1,8 +1,8 @@
 package fr.bowserf.soundsystem;
 
-import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Handler;
+import android.os.Looper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +36,9 @@ public class SoundSystem {
      *
      * @return Get the instance of this class.
      */
-    public static SoundSystem getInstance(final Context context) {
+    public static SoundSystem getInstance() {
         if (sInstance == null) {
-            sInstance = new SoundSystem(context);
+            sInstance = new SoundSystem(Looper.getMainLooper());
         }
         return sInstance;
     }
@@ -61,8 +61,8 @@ public class SoundSystem {
     /**
      * Private constructor.
      */
-    private SoundSystem(final Context context) {
-        mMainHandler = new Handler(context.getMainLooper());
+    private SoundSystem(final Looper mainThreadLooper) {
+        mMainHandler = new Handler(mainThreadLooper);
 
         mPlayingStatusObservers = new ArrayList<>();
         mExtractionObservers = new ArrayList<>();
@@ -78,6 +78,14 @@ public class SoundSystem {
         native_init_soundsystem(nativeFrameRate, nativeFramesPerBuf);
     }
 
+    /**
+     * Release native objects and this object.
+     */
+    public void release() {
+        native_release_soundsystem();
+        sInstance = null;
+    }
+
     public boolean isSoundSystemInit(){
         return native_is_soundsystem_init();
     }
@@ -91,10 +99,6 @@ public class SoundSystem {
         native_load_file(filePath);
     }
 
-    public void playSong(final Context context){
-        native_extract_from_assets_and_play(context.getAssets(), "sound.mp3");
-    }
-
     /**
      * Play music if params is true, otherwise, pause the music.
      *
@@ -102,6 +106,13 @@ public class SoundSystem {
      */
     public void playMusic(final boolean isPlaying) {
         native_play(isPlaying);
+    }
+
+    /**
+     * Stop music.
+     */
+    public void stopMusic() {
+        native_stop();
     }
 
     /**
@@ -121,26 +132,29 @@ public class SoundSystem {
     }
 
     /**
-     * Stop music.
+     * Provide extracted data from audio file. Data[2n] represent one channel and Data[2n+1]
+     * represente the other channel.
+     * @return A short array containing all extracted data from audio file.
      */
-    public void stopMusic() {
-        native_stop();
-    }
-
     public short[] getExtractedData(){
         return native_get_extracted_data();
     }
 
+    /**
+     * Provide mono data generate from extracted data which where in stereo mode.
+     * @return A shorrt array containing mono data of extracted audio file.
+     */
     public short[] getExtractedDataMono(){
         return native_get_extracted_data_mono();
     }
 
     /**
-     * Release native objects and this object.
+     * Extract and directly play the audio file without step of extract the whole file into RAM.
+     * @param assetManager  An {@link AssetManager}.
+     * @param fileName      Name of the file to play which is inside Asset folder.
      */
-    public void release() {
-        native_release_soundsystem();
-        sInstance = null;
+    public void playSong(final AssetManager assetManager, final String fileName){
+        native_extract_from_assets_and_play(assetManager, fileName);
     }
 
     //---------------

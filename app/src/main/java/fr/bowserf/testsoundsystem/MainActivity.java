@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
         final AudioFeaturesManager audioFeaturesManager = AudioFeaturesManager.init(this);
 
-        mSoundSystem = SoundSystem.getInstance(this);
+        mSoundSystem = SoundSystem.init(getMainLooper());
         if(!mSoundSystem.isSoundSystemInit()) {
             mSoundSystem.initSoundSystem(
                     audioFeaturesManager.getSampleRate(),
