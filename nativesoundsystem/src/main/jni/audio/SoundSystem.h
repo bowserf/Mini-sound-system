@@ -12,6 +12,9 @@
 // C++ header
 #include <assert.h>
 
+// Provide memmove
+#include <cstring>
+
 // Androiddebug
 #include <utils/android_debug.h>
 

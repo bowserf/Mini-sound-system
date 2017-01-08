@@ -3,11 +3,9 @@
 
 #include <jni.h>
 
-#include <cstring>
-
 #include <utils/android_debug.h>
 
-static JavaVM *_JVM = NULL;
+static JavaVM *_JVM = nullptr;
 
 class SoundSystemCallback {
 public:

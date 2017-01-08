@@ -28,8 +28,8 @@ SoundSystemCallback::~SoundSystemCallback() {
     jint detachedStatus;
     JNIEnv *env = getEventCallbackEnvironnement(_JVM, &detachedStatus);
     env->DeleteGlobalRef(_soundSystemInstance);
-    _soundSystemInstance = NULL;
-    _endTrackMethodId = NULL;
+    _soundSystemInstance = nullptr;
+    _endTrackMethodId = nullptr;
 }
 
 void SoundSystemCallback::notifyPlayPause(bool play) {
@@ -94,9 +94,9 @@ JNIEnv *SoundSystemCallback::getEventCallbackEnvironnement(JavaVM *JVM, jint *de
     jint status = JVM->GetEnv((void **) &env, JNI_VERSION_1_6);
     *detachedStatus = status;
     if (status == JNI_EDETACHED) {
-        status = JVM->AttachCurrentThread(&env, NULL);
+        status = JVM->AttachCurrentThread(&env, nullptr);
         if (status < 0) {
-            return NULL;
+            return nullptr;
         }
     }
     return env;

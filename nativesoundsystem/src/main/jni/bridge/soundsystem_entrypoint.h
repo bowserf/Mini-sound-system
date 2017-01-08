@@ -4,9 +4,6 @@
 // JNI
 #include <jni.h>
 
-// access to NULL
-#include <cstring>
-
 // android
 #include <utils/android_debug.h>
 
@@ -14,10 +11,6 @@
 #include <sys/types.h>
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
-
-// throw exception
-#include <iostream>
-#include <stdexcept>
 
 #include <assert.h>
 
