@@ -307,7 +307,7 @@ void SoundSystem::extractAndPlayDirectly(void *sourceFile) {
 
 void SoundSystem::extractMetaData() {
     (*_extractPlayerPlay)->GetDuration(_extractPlayerPlay, &_musicDuration);
-    _totalFrames = (int) (((double) _musicDuration * (double) _sampleRate / 1000.0));
+    _totalFrames = (unsigned int) (((double) _musicDuration * (double) _sampleRate / 1000.0));
 }
 
 void SoundSystem::play(bool play) {
