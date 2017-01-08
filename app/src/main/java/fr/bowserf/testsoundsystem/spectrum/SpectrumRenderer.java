@@ -34,7 +34,8 @@ class SpectrumRenderer implements GLSurfaceView.Renderer {
         mLine.draw();
     }
 
-    public void drawData(short[] data, int desiredNumberData){
+    /* package */
+    void drawData(short[] data, int desiredNumberData){
         mLine.drawData(data, desiredNumberData);
     }
 }
