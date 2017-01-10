@@ -3,7 +3,7 @@
 
 #include <jni.h>
 
-#include <utils/android_debug.h>
+#include "../utils/android_debug.h"
 
 static JavaVM *_JVM = nullptr;
 

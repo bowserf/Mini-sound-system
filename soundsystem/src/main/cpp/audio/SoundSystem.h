@@ -16,12 +16,12 @@
 #include <cstring>
 
 // Androiddebug
-#include <utils/android_debug.h>
+#include "../utils/android_debug.h"
 
 // Access to malloc, free etc...
 #include <malloc.h>
 
-#include "listener/SoundSystemCallback.h"
+#include "../listener/SoundSystemCallback.h"
 
 static void extractionEndCallback(SLPlayItf caller, void *pContext, SLuint32 event);
 static void queueExtractorCallback(SLAndroidSimpleBufferQueueItf aSoundQueue, void *aContext);

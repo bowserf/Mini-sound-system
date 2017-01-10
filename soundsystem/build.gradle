@@ -1,27 +1,30 @@
-apply plugin: 'com.android.model.library'
+apply plugin: 'com.android.library'
 
-model {
-    android {
-        compileSdkVersion rootProject.ext.compileSdkVersion
-        buildToolsVersion rootProject.ext.buildToolsVersion
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
-        defaultConfig.with {
-            minSdkVersion.apiLevel rootProject.ext.minSdkVersion
-            targetSdkVersion.apiLevel rootProject.ext.targetSdkVersion
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+
+        externalNativeBuild {
+            cmake {
+                cFlags "-std=c99"
+                cFlags "-DANDROID_SOUND_SYSTEM"
+                cppFlags "-std=c++11"
+                cppFlags "-DANDROID_SOUND_SYSTEM"
+            }
         }
     }
 
-    android.sources {
-        main {
-            jniLibs {
-                dependencies {
-                    project ":nativesoundsystem"
-                }
-            }
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
         }
     }
 }
 
 dependencies {
-    compile 'com.android.support:support-annotations:25.0.1'
+    compile 'com.android.support:support-annotations:25.1.0'
 }

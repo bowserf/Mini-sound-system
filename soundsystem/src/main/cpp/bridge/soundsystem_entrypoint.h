@@ -5,7 +5,7 @@
 #include <jni.h>
 
 // android
-#include <utils/android_debug.h>
+#include "../utils/android_debug.h"
 
 // for native asset manager
 #include <sys/types.h>
@@ -14,9 +14,9 @@
 
 #include <assert.h>
 
-#include "audio/SoundSystem.h"
+#include "../audio/SoundSystem.h"
 
-#include "listener/SoundSystemCallback.h"
+#include "../listener/SoundSystemCallback.h"
 
 static SoundSystem* _soundSystem;
 
