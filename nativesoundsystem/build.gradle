@@ -3,6 +3,9 @@ apply plugin: 'com.android.model.native'
 model {
     android {
         compileSdkVersion rootProject.ext.compileSdkVersion
+
+        // This allows the library project to be built in debug mode, so we can actually debug it
+        publishNonDefault true
     }
 
     android.ndk {
@@ -27,3 +30,10 @@ model {
         }
     }
 }
+
+configurations {
+    // Expose the debug version of the library to other modules
+    debug
+    release
+}
+

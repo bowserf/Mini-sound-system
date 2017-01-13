@@ -242,7 +242,7 @@ void SoundSystem::initAudioPlayer() {
                                            numberInterface, ids, req);
     // note that an invalid URI is not detected here, but during prepare/prefetch on Android,
     // or possibly during Realize on other platforms
-    assert(result);
+    SLASSERT(result);
 
     // realize the player
     result = (*_playerObject)->Realize(_playerObject, SL_BOOLEAN_FALSE);

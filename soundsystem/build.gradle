@@ -9,6 +9,9 @@ model {
             minSdkVersion.apiLevel rootProject.ext.minSdkVersion
             targetSdkVersion.apiLevel rootProject.ext.targetSdkVersion
         }
+
+        // This allows the library project to be built in debug mode, so we can actually debug it
+        publishNonDefault true
     }
 
     android.sources {
@@ -24,4 +27,10 @@ model {
 
 dependencies {
     compile 'com.android.support:support-annotations:25.0.1'
+}
+
+configurations {
+    // Expose the debug version of the library to other modules
+    debug
+    release
 }
