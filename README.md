@@ -69,13 +69,13 @@ OpenGL ES in order to display audio spectrum with a low level library instead of
 
 ### Other branches
 
-[Player read float data](https://github.com/bowserf/Mini-sound-system/tree/dev/test_player_float) : From Lollipop (API 21), an OpenSL ES player
-can manage float data instead of short data.
-Structure `SLAndroidDataFormat_PCM_EX` has been added and can replace `SLDataFormat_PCM`. You can
-use field `representation` with value `SL_ANDROID_PCM_REPRESENTATION_FLOAT` to say that you work
-with float data. Your code will stay the same instead that you need a float array buffer.
+[CMake to compile native code](https://github.com/bowserf/Mini-sound-system/tree/ft/cmake_in_library) :
+Use of standard android gradle with CMake in order to compile module `soundsystem` which contain native code.
+It differs from gradle-experimental because we haven't to add a native module which contains only C & C++ code
+and a library module which will be the bridge between native module and application module. Here, we have only
+one library module.
 
-[Vertex buffer object](https://github.com/bowserf/Mini-sound-system/tree/dev/vbo): Improve OpenGL performance by using vertex buffer object.
+[Vertex buffer object](https://github.com/bowserf/Mini-sound-system/tree/dev/vbo) : Improve OpenGL performance by using vertex buffer object.
 With this method, we send data directly to the GPU RAM. GPU doesn't have to ask to CPU RAM what are
 data because it already has it into its own RAM.
 
