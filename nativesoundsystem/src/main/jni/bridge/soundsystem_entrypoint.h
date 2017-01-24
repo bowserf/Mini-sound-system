@@ -58,6 +58,8 @@ bool isSoundSystemInit();
 
 SLDataLocator_URI *dataLocatorFromURLString(JNIEnv *env, jstring fileURLString);
 
+short* convertFloatDataToShort(float* data, unsigned int length);
+
 SLDataLocator_AndroidFD getTrackFromAsset(JNIEnv *env, jobject assetManager, jstring filename);
 
 #endif //TEST_SOUNDSYSTEM_SOUNDSYSTEM_ENTRYPOINT_H

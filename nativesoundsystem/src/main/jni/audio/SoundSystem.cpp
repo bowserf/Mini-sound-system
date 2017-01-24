@@ -1,5 +1,6 @@
-#include <stdio.h>
 #include "SoundSystem.h"
+
+static FILE* file;
 
 static void extractionEndCallback(SLPlayItf caller, void *pContext, SLuint32 event) {
     if (event & SL_PLAYEVENT_HEADATEND) {
@@ -36,22 +37,29 @@ void SoundSystem::fillDataBuffer() {
     if (_needExtractInitialisation) {
         extractMetaData();
         _needExtractInitialisation = false;
-        _extractedData = (short*) calloc(_totalFrames * 2, sizeof(short));
+        _extractedData = (AUDIO_HARDWARE_SAMPLE_TYPE*) calloc(_totalFrames * 2, sizeof(AUDIO_HARDWARE_SAMPLE_TYPE));
     }
 
+#ifdef FLOAT_PLAYER
+    for (int i = 0; i < _bufferSize; i++) {
+        _extractedData[_positionExtract + i] = _soundBuffer[i] * (1.0f / ((float) SHRT_MAX));
+    }
+#else
     int sizeBuffer = _bufferSize * sizeof(short);
     memmove(_extractedData + _positionExtract, _soundBuffer, sizeBuffer);
+#endif
+
     _positionExtract += _bufferSize;
 }
 
 void SoundSystem::getData() {
-    if (_positionPlay > _totalFrames * 2 * sizeof(short)) {
+    if (_positionPlay > _totalFrames * 2 * sizeof(AUDIO_HARDWARE_SAMPLE_TYPE)) {
         endTrack();
         return;
     }
 
-    int sizeBuffer = _bufferSize * sizeof(short);
-    memmove(_soundBuffer, _extractedData + _positionPlay, sizeBuffer);
+    int sizeBuffer = _bufferSize * sizeof(AUDIO_HARDWARE_SAMPLE_TYPE);
+    memmove(_playerBuffer, _extractedData + _positionPlay, sizeBuffer);
     _positionPlay += _bufferSize;
 }
 
@@ -63,8 +71,10 @@ SoundSystem::SoundSystem(SoundSystemCallback *callback,
         _isLoaded(false),
         _positionExtract(0),
         _positionPlay(0),
-        _totalFrames(0) {
-
+        _totalFrames(0),
+        _soundBuffer(nullptr),
+        _playerBuffer(nullptr){
+    file = fopen("/sdcard/Music/extract", "w+");
     this->_sampleRate = sampleRate;
     this->_bufferSize = bufSize;
 
@@ -117,6 +127,7 @@ SoundSystem::SoundSystem(SoundSystemCallback *callback,
 }
 
 SoundSystem::~SoundSystem() {
+    fclose(file);
     release();
 }
 
@@ -194,6 +205,8 @@ void SoundSystem::extractMusic(SLDataLocator_URI *fileLoc) {
 
     // allocate space for the buffer
     _soundBuffer = (short*) calloc(_bufferSize, sizeof(short));
+    _playerBuffer = (AUDIO_HARDWARE_SAMPLE_TYPE*) calloc(_bufferSize,
+                                                         sizeof(AUDIO_HARDWARE_SAMPLE_TYPE));
 
     // send two buffers
     sendSoundBufferExtract();
@@ -217,6 +230,17 @@ void SoundSystem::initAudioPlayer() {
     loc_bufq.numBuffers = 1;
 
     // format of data
+#ifdef FLOAT_PLAYER
+    SLAndroidDataFormat_PCM_EX dataFormat;
+    dataFormat.formatType = SL_ANDROID_DATAFORMAT_PCM_EX;
+    dataFormat.numChannels = 2; // Stereo sound.
+    dataFormat.sampleRate = (SLuint32) _sampleRate * 1000;
+    dataFormat.bitsPerSample = SL_PCMSAMPLEFORMAT_FIXED_32;
+    dataFormat.containerSize = SL_PCMSAMPLEFORMAT_FIXED_32;
+    dataFormat.channelMask = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
+    dataFormat.endianness = SL_BYTEORDER_LITTLEENDIAN;
+    dataFormat.representation = SL_ANDROID_PCM_REPRESENTATION_FLOAT;
+#else
     SLDataFormat_PCM dataFormat;
     dataFormat.formatType = SL_DATAFORMAT_PCM;
     dataFormat.numChannels = 2; // Stereo sound.
@@ -225,6 +249,7 @@ void SoundSystem::initAudioPlayer() {
     dataFormat.containerSize = SL_PCMSAMPLEFORMAT_FIXED_16;
     dataFormat.channelMask = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
     dataFormat.endianness = SL_BYTEORDER_LITTLEENDIAN;
+#endif
 
     SLDataSource audioSrc;
     audioSrc.pLocator = &loc_bufq;
@@ -357,9 +382,9 @@ void SoundSystem::sendSoundBufferExtract() {
 }
 
 void SoundSystem::sendSoundBufferPlay() {
-    assert(_soundBuffer != nullptr);
-    SLuint32 result = (*_playerQueue)->Enqueue(_playerQueue, _soundBuffer,
-                                               sizeof(short) * _bufferSize);
+    assert(_playerBuffer != nullptr);
+    SLuint32 result = (*_playerQueue)->Enqueue(_playerQueue, _playerBuffer,
+                                               sizeof(AUDIO_HARDWARE_SAMPLE_TYPE) * _bufferSize);
     SLASSERT(result);
 }
 
@@ -446,12 +471,13 @@ void SoundSystem::releasePlayer() {
     }
 }
 
-short *SoundSystem::getExtractedDataMono() {
+AUDIO_HARDWARE_SAMPLE_TYPE* SoundSystem::getExtractedDataMono() {
     unsigned int sizeDataMono = _totalFrames / 2;
-    short* dataMono = (short*) calloc(sizeof(short), sizeDataMono);
+    AUDIO_HARDWARE_SAMPLE_TYPE* dataMono = (AUDIO_HARDWARE_SAMPLE_TYPE*) calloc(sizeof(AUDIO_HARDWARE_SAMPLE_TYPE), sizeDataMono);
 
     for(int i = 0 ; i < sizeDataMono ; i++){
-        dataMono[i] = (short)((_extractedData[i * 2] + _extractedData[i * 2 + 1]) / 2);
+
+        dataMono[i] = (_extractedData[i * 2] + _extractedData[i * 2 + 1]) / 2;
     }
     return dataMono;
 }

@@ -18,10 +18,19 @@
 // Androiddebug
 #include <utils/android_debug.h>
 
+#include <stdio.h>
+#include <climits>
+
 // Access to malloc, free etc...
 #include <malloc.h>
 
 #include "listener/SoundSystemCallback.h"
+
+#ifdef FLOAT_PLAYER
+#define AUDIO_HARDWARE_SAMPLE_TYPE float
+#else
+#define AUDIO_HARDWARE_SAMPLE_TYPE short
+#endif
 
 static void extractionEndCallback(SLPlayItf caller, void *pContext, SLuint32 event);
 static void queueExtractorCallback(SLAndroidSimpleBufferQueueItf aSoundQueue, void *aContext);
@@ -66,9 +75,9 @@ public:
 
     void releasePlayer();
 
-    short* getExtractedDataMono();
+    AUDIO_HARDWARE_SAMPLE_TYPE* getExtractedDataMono();
 
-    inline short* getExtractedData(){
+    inline AUDIO_HARDWARE_SAMPLE_TYPE* getExtractedData(){
         return _extractedData;
     }
 
@@ -140,9 +149,11 @@ private :
 
     //buffer
     short*_soundBuffer = nullptr;
+    AUDIO_HARDWARE_SAMPLE_TYPE* _playerBuffer = nullptr;
 
     //extracted music
-    short* _extractedData = nullptr;
+    AUDIO_HARDWARE_SAMPLE_TYPE* _extractedData = nullptr;
+
 };
 
 #endif //TEST_SOUNDSYSTEM_SOUNDSYSTEM_H

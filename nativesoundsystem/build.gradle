@@ -13,11 +13,13 @@ model {
         ldLibs.addAll(["log", "android", "OpenSLES"])
         abiFilters.addAll(["armeabi", "armeabi-v7a", "x86"])
         CFlags.add("-std=c99")
-        CFlags.add("-DANDROID_SOUND_SYSTEM")
         cppFlags.add("-std=c++11")
-        cppFlags.add("-DANDROID_SOUND_SYSTEM")
         stl "stlport_static"
         platformVersion = rootProject.ext.minSdkVersion //same as minSdkVersion.apiLevel for better compatibility
+        if (rootProject.ext.minSdkVersion >= 21) {
+            cppFlags.addAll(["-DFLOAT_PLAYER"])
+            CFlags.addAll(["-DFLOAT_PLAYER"])
+        }
     }
 
     android.sources {
