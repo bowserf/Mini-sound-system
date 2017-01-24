@@ -1,0 +1,4 @@
+See file:///D:/Informatique/Android/Workspace/Mini-sound-system/nativesoundsystem/build/tmp/compileSoundsystemX86DebugSharedLibrarySoundsystemX86DebugSharedLibraryMainCpp/output.txt for all output for compileSoundsystemX86DebugSharedLibrarySoundsystemX86DebugSharedLibraryMainCpp.
+compiling soundsystem_entrypoint.cpp successful.
+
+Finished compileSoundsystemX86DebugSharedLibrarySoundsystemX86DebugSharedLibraryMainCpp, see full log file:///D:/Informatique/Android/Workspace/Mini-sound-system/nativesoundsystem/build/tmp/compileSoundsystemX86DebugSharedLibrarySoundsystemX86DebugSharedLibraryMainCpp/output.txt.

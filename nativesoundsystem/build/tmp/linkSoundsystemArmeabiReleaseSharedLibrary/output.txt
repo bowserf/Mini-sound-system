@@ -1,0 +1,4 @@
+See file:///D:/Informatique/Android/Workspace/Mini-sound-system/nativesoundsystem/build/tmp/linkSoundsystemArmeabiReleaseSharedLibrary/output.txt for all output for linkSoundsystemArmeabiReleaseSharedLibrary.
+linking libsoundsystem.so successful.
+
+Finished linkSoundsystemArmeabiReleaseSharedLibrary, see full log file:///D:/Informatique/Android/Workspace/Mini-sound-system/nativesoundsystem/build/tmp/linkSoundsystemArmeabiReleaseSharedLibrary/output.txt.

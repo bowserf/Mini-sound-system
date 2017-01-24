@@ -23,6 +23,15 @@ android {
             path "CMakeLists.txt"
         }
     }
+
+    // This allows the library project to be built in debug mode, so we can actually debug it
+    publishNonDefault true
+}
+
+configurations {
+    // Expose the debug version of the library to other modules
+    debug
+    release
 }
 
 dependencies {

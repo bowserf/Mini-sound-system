@@ -1,0 +1,4 @@
+See file:///D:/Informatique/Android/Workspace/Mini-sound-system/nativesoundsystem/build/tmp/compileSoundsystemArmeabiDebugSharedLibrarySoundsystemArmeabiDebugSharedLibraryMainCpp/output.txt for all output for compileSoundsystemArmeabiDebugSharedLibrarySoundsystemArmeabiDebugSharedLibraryMainCpp.
+compiling soundsystem_entrypoint.cpp successful.
+
+Finished compileSoundsystemArmeabiDebugSharedLibrarySoundsystemArmeabiDebugSharedLibraryMainCpp, see full log file:///D:/Informatique/Android/Workspace/Mini-sound-system/nativesoundsystem/build/tmp/compileSoundsystemArmeabiDebugSharedLibrarySoundsystemArmeabiDebugSharedLibraryMainCpp/output.txt.

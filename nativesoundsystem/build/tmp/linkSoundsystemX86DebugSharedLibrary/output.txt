@@ -1,0 +1,4 @@
+See file:///D:/Informatique/Android/Workspace/Mini-sound-system/nativesoundsystem/build/tmp/linkSoundsystemX86DebugSharedLibrary/output.txt for all output for linkSoundsystemX86DebugSharedLibrary.
+linking libsoundsystem.so successful.
+
+Finished linkSoundsystemX86DebugSharedLibrary, see full log file:///D:/Informatique/Android/Workspace/Mini-sound-system/nativesoundsystem/build/tmp/linkSoundsystemX86DebugSharedLibrary/output.txt.

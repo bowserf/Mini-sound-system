@@ -13,6 +13,11 @@ android {
     }
 
     buildTypes {
+        debug{
+            minifyEnabled = false
+            debuggable true
+            jniDebuggable true
+        }
         release {
             minifyEnabled = false
             proguardFiles.add(file('proguard-rules.pro'))
@@ -23,5 +28,7 @@ android {
 dependencies {
     compile 'com.android.support:appcompat-v7:25.1.0'
 
-    compile project(':soundsystem')
+    //compile project(':soundsystem')
+    releaseCompile project(path: ':soundsystem', configuration: 'release')
+    debugCompile project(path: ':soundsystem', configuration: 'debug')
 }
