@@ -146,7 +146,8 @@ public class SoundSystem {
      * @return A shorrt array containing mono data of extracted audio file.
      */
     public short[] getExtractedDataMono(){
-        return native_get_extracted_data_mono();
+        //return native_get_extracted_data_mono();
+        return new short[0];
     }
 
     /**

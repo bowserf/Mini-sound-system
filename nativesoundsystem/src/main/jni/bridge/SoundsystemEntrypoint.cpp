@@ -11,6 +11,11 @@ void Java_fr_bowserf_soundsystem_SoundSystem_native_1init_1soundsystem(JNIEnv *e
 #ifdef MEDIACODEC_EXTRACTOR
     _extractorNougat = new ExtractorNougat(_soundSystem, sample_rate);
 #endif
+
+#ifdef AAUDIO
+    _aaudio_manager = new AAudioManager(sample_rate, frames_per_buf);
+    _aaudio_manager->createEngine(_soundSystem);
+#endif
 }
 
 jboolean Java_fr_bowserf_soundsystem_SoundSystem_native_1is_1soundsystem_1init(JNIEnv *env,
@@ -37,7 +42,16 @@ void Java_fr_bowserf_soundsystem_SoundSystem_native_1play(JNIEnv *env, jclass jc
     if(!isSoundSystemInit()){
         return;
     }
+
+#ifdef AAUDIO
+    if(play){
+        _aaudio_manager->start();
+    }else{
+        _aaudio_manager->stop();
+    }
+#else
     _soundSystem->play(play);
+#endif
 }
 
 jboolean Java_fr_bowserf_soundsystem_SoundSystem_native_1is_1playing(JNIEnv *env, jclass jclass1){
@@ -59,6 +73,9 @@ void Java_fr_bowserf_soundsystem_SoundSystem_native_1stop(JNIEnv *env, jclass jc
         return;
     }
     _soundSystem->stop();
+#ifdef AAUDIO
+    _aaudio_manager->deleteEngine();
+#endif
 }
 
 void Java_fr_bowserf_soundsystem_SoundSystem_native_1extract_1and_1play(JNIEnv *env, jobject obj, jstring filePath){
@@ -81,10 +98,18 @@ void Java_fr_bowserf_soundsystem_SoundSystem_native_1release_1soundsystem(JNIEnv
         delete _soundSystem;
         _soundSystem = nullptr;
     }
+
 #ifdef MEDIACODEC_EXTRACTOR
-    if(_extractorNougat!= nullptr){
+    if(_extractorNougat!= nullptr) {
         delete _extractorNougat;
         _extractorNougat = nullptr;
+    }
+#endif
+
+#ifdef AAUDIO
+    if(_aaudio_manager != nullptr){
+        delete _aaudio_manager;
+        _aaudio_manager = nullptr;
     }
 #endif
 }
@@ -93,7 +118,7 @@ jshortArray Java_fr_bowserf_soundsystem_SoundSystem_native_1get_1extracted_1data
     if(!isSoundSystemInit()){
         return nullptr;
     }
-    unsigned int length = _soundSystem->getTotalNumberFrames();
+    unsigned int length = _soundSystem->getTotalNumberFrames()/40;
     AUDIO_HARDWARE_SAMPLE_TYPE* tmpExtractedData = _soundSystem->getExtractedData();
 
 #ifdef FLOAT_PLAYER
@@ -115,6 +140,7 @@ jshortArray Java_fr_bowserf_soundsystem_SoundSystem_native_1get_1extracted_1data
     if(!isSoundSystemInit()){
         return nullptr;
     }
+
     AUDIO_HARDWARE_SAMPLE_TYPE* tmpExtractedData = _soundSystem->getExtractedDataMono();
     unsigned int length = _soundSystem->getTotalNumberFrames()/2;
 
