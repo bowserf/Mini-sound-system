@@ -1,22 +1,16 @@
 #ifndef TEST_SOUNDSYSTEM_SOUNDSYSTEM_ENTRYPOINT_H
 #define TEST_SOUNDSYSTEM_SOUNDSYSTEM_ENTRYPOINT_H
 
-// JNI
 #include <jni.h>
-
-// android
 #include <utils/android_debug.h>
-
-// for native asset manager
 #include <sys/types.h>
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
-
 #include <assert.h>
-#include <audio/extractornougat/ExtractorNougat.h>
 
+#include "audio/extractornougat/ExtractorNougat.h"
+#include "aaudio/AAudioManager.h"
 #include "audio/SoundSystem.h"
-
 #include "listener/SoundSystemCallback.h"
 
 static SoundSystem* _soundSystem;
@@ -25,6 +19,10 @@ static SoundSystemCallback* _soundSystemCallback;
 
 #ifdef MEDIACODEC_EXTRACTOR
 static ExtractorNougat* _extractorNougat;
+#endif
+
+#ifdef AAUDIO_API
+static AAudioManager *_aaudio_manager;
 #endif
 
 extern "C" {
