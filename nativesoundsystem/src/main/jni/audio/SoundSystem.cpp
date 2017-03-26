@@ -2,9 +2,20 @@
 
 static FILE* file;
 
+static double now_ms(void) {
+    struct timespec res;
+    clock_gettime(CLOCK_REALTIME, &res);
+    return 1000.0 * res.tv_sec + (double) res.tv_nsec / 1e6;
+
+}
+
 static void extractionEndCallback(SLPlayItf caller, void *pContext, SLuint32 event) {
     if (event & SL_PLAYEVENT_HEADATEND) {
         SoundSystem *self = static_cast<SoundSystem *>(pContext);
+
+        const double extractionEndTime = now_ms();
+        LOGI("Extraction duration %f", extractionEndTime - self->getExtractionStartTime());
+
         self->setIsLoaded(true);
         self->notifyExtractionEnded();
     }
@@ -35,9 +46,14 @@ static void queuePlayerCallback(SLAndroidSimpleBufferQueueItf aSoundQueue, void 
 
 void SoundSystem::fillDataBuffer() {
     if (_needExtractInitialisation) {
+        notifyExtractionStarted();
+
         extractMetaData();
+
         _needExtractInitialisation = false;
         _extractedData = (AUDIO_HARDWARE_SAMPLE_TYPE*) calloc(_totalFrames * 2, sizeof(AUDIO_HARDWARE_SAMPLE_TYPE));
+
+        _extractionStartTime = now_ms();
     }
 
 #ifdef FLOAT_PLAYER
@@ -215,8 +231,6 @@ void SoundSystem::extractMusic(SLDataLocator_URI *fileLoc) {
     // start the extraction
     result = (*_extractPlayerPlay)->SetPlayState(_extractPlayerPlay, SL_PLAYSTATE_PLAYING);
     SLASSERT(result);
-
-    notifyExtractionStarted();
 
     _isLoaded = false;
 }

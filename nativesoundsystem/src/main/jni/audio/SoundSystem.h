@@ -24,6 +24,9 @@
 // Access to malloc, free etc...
 #include <malloc.h>
 
+// Use to compute extraction duration
+#include <time.h>
+
 #include "listener/SoundSystemCallback.h"
 
 #ifdef FLOAT_PLAYER
@@ -93,6 +96,10 @@ public:
         _isLoaded = isLoaded;
     }
 
+    inline double getExtractionStartTime(){
+        return _extractionStartTime;
+    }
+
     //------------------------
     // - Extraction methods -
     //------------------------
@@ -121,6 +128,8 @@ private :
     bool _isLoaded;
 
     bool _needExtractInitialisation;
+
+    double _extractionStartTime;
 
     // extracted track info
     SLmillisecond  _musicDuration = 0;
