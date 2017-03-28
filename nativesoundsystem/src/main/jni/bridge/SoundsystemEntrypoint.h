@@ -13,6 +13,7 @@
 #include <android/asset_manager_jni.h>
 
 #include <assert.h>
+#include <audio/extractornougat/ExtractorNougat.h>
 
 #include "audio/SoundSystem.h"
 
@@ -21,6 +22,10 @@
 static SoundSystem* _soundSystem;
 
 static SoundSystemCallback* _soundSystemCallback;
+
+#ifdef MEDIACODEC_EXTRACTOR
+static ExtractorNougat* _extractorNougat;
+#endif
 
 extern "C" {
 

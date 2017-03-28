@@ -1,4 +1,4 @@
-#include "soundsystem_entrypoint.h"
+#include "SoundsystemEntrypoint.h"
 
 void Java_fr_bowserf_soundsystem_SoundSystem_native_1init_1soundsystem(JNIEnv *env,
                                                                jclass jclass1,
@@ -7,6 +7,10 @@ void Java_fr_bowserf_soundsystem_SoundSystem_native_1init_1soundsystem(JNIEnv *e
     _soundSystemCallback = new SoundSystemCallback(env, jclass1);
 
     _soundSystem = new SoundSystem(_soundSystemCallback, sample_rate, frames_per_buf);
+
+#ifdef MEDIACODEC_EXTRACTOR
+    _extractorNougat = new ExtractorNougat(_soundSystem, sample_rate);
+#endif
 }
 
 jboolean Java_fr_bowserf_soundsystem_SoundSystem_native_1is_1soundsystem_1init(JNIEnv *env,
@@ -20,7 +24,12 @@ void Java_fr_bowserf_soundsystem_SoundSystem_native_1load_1file(JNIEnv *env,
     if(!isSoundSystemInit()){
         return;
     }
+#ifdef MEDIACODEC_EXTRACTOR
+    const char *urf8FileURLString = env->GetStringUTFChars(filePath, NULL);
+    _extractorNougat->extract(urf8FileURLString);
+#else
     _soundSystem->extractMusic(dataLocatorFromURLString(env, filePath));
+#endif
     _soundSystem->initAudioPlayer();
 }
 
@@ -72,6 +81,12 @@ void Java_fr_bowserf_soundsystem_SoundSystem_native_1release_1soundsystem(JNIEnv
         delete _soundSystem;
         _soundSystem = nullptr;
     }
+#ifdef MEDIACODEC_EXTRACTOR
+    if(_extractorNougat!= nullptr){
+        delete _extractorNougat;
+        _extractorNougat = nullptr;
+    }
+#endif
 }
 
 jshortArray Java_fr_bowserf_soundsystem_SoundSystem_native_1get_1extracted_1data(JNIEnv *env, jclass jclass1) {
@@ -84,7 +99,7 @@ jshortArray Java_fr_bowserf_soundsystem_SoundSystem_native_1get_1extracted_1data
 #ifdef FLOAT_PLAYER
     short* extractedData = convertFloatDataToShort(tmpExtractedData, length);
 #else
-    short* extractedData = (short*)tmpExtractedData;
+    short* extractedData = tmpExtractedData;
 #endif
 
     jshortArray jExtractedData = env->NewShortArray(length);
@@ -105,7 +120,7 @@ jshortArray Java_fr_bowserf_soundsystem_SoundSystem_native_1get_1extracted_1data
 #ifdef FLOAT_PLAYER
     short* extractedData = convertFloatDataToShort(tmpExtractedData, length);
 #else
-    short* extractedData = (short*)tmpExtractedData;
+    short* extractedData = tmpExtractedData;
 #endif
 
     jshortArray jExtractedData = env->NewShortArray(length);
