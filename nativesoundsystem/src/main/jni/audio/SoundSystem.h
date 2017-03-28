@@ -84,6 +84,14 @@ public:
         return _extractedData;
     }
 
+    inline void setExtractedData(AUDIO_HARDWARE_SAMPLE_TYPE* extractedData){
+        _extractedData = extractedData;
+    }
+
+    inline void setTotalNumberFrames(unsigned int totalFrames){
+        _totalFrames = totalFrames;
+    }
+
     inline unsigned int getTotalNumberFrames(){
         return _totalFrames;
     }
