@@ -16,7 +16,11 @@ model {
         cppFlags.add("-std=c++11")
         stl "stlport_static"
         platformVersion = rootProject.ext.minSdkVersion //same as minSdkVersion.apiLevel for better compatibility
-        if (rootProject.ext.minSdkVersion >= 21) {
+        if (rootProject.ext.minSdkVersion >= 24) {
+            ldLibs.addAll(["mediandk"])
+            cppFlags.addAll(["-DMEDIACODEC_EXTRACTOR"])
+            CFlags.addAll(["-DMEDIACODEC_EXTRACTOR"])
+        }else if(rootProject.ext.minSdkVersion >= 21) {
             cppFlags.addAll(["-DFLOAT_PLAYER"])
             CFlags.addAll(["-DFLOAT_PLAYER"])
         }
