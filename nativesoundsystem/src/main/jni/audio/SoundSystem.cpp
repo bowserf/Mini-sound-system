@@ -6,7 +6,6 @@ static double now_ms(void) {
     struct timespec res;
     clock_gettime(CLOCK_REALTIME, &res);
     return 1000.0 * res.tv_sec + (double) res.tv_nsec / 1e6;
-
 }
 
 static void extractionEndCallback(SLPlayItf caller, void *pContext, SLuint32 event) {
@@ -14,7 +13,7 @@ static void extractionEndCallback(SLPlayItf caller, void *pContext, SLuint32 eve
         SoundSystem *self = static_cast<SoundSystem *>(pContext);
 
         const double extractionEndTime = now_ms();
-        LOGI("Extraction duration %f", extractionEndTime - self->getExtractionStartTime());
+        LOGI("Extraction opensl duration %f", extractionEndTime - self->getExtractionStartTime());
 
         self->setIsLoaded(true);
         self->notifyExtractionEnded();
@@ -221,8 +220,6 @@ void SoundSystem::extractMusic(SLDataLocator_URI *fileLoc) {
 
     // allocate space for the buffer
     _soundBuffer = (short*) calloc(_bufferSize, sizeof(short));
-    _playerBuffer = (AUDIO_HARDWARE_SAMPLE_TYPE*) calloc(_bufferSize,
-                                                         sizeof(AUDIO_HARDWARE_SAMPLE_TYPE));
 
     // send two buffers
     sendSoundBufferExtract();
@@ -297,6 +294,9 @@ void SoundSystem::initAudioPlayer() {
     // register callback for queue
     result = (*_playerQueue)->RegisterCallback(_playerQueue, queuePlayerCallback, this);
     SLASSERT(result);
+
+    _playerBuffer = (AUDIO_HARDWARE_SAMPLE_TYPE*) calloc(_bufferSize,
+                                                         sizeof(AUDIO_HARDWARE_SAMPLE_TYPE));
 }
 
 bool SoundSystem::isPlaying(){
@@ -367,7 +367,6 @@ void SoundSystem::play(bool play) {
 
             notifyPlayPause(false);
         }
-        SLASSERT(result);
     }
 }
 
