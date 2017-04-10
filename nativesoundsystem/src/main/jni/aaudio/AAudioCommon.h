@@ -19,7 +19,7 @@
 #ifndef AAUDIO_AUDIO_COMMON_H
 #define AAUDIO_AUDIO_COMMON_H
 
-#include "aaudio/headers/aaudio_wrapper.h"
+#include <aaudio/AAudio.h>
 #include <utils/android_debug.h>
 
 /*

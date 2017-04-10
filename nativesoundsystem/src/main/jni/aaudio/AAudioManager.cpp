@@ -94,12 +94,6 @@ bool AAudioManager::createEngine(SoundSystem *soundSystem) {
 
     memset(&engine, 0, sizeof(engine));
 
-    // Initialize AAudio wrapper
-    if (!InitAAudio()) {
-        LOGE("AAudio is not supported on your platform, cannot proceed");
-        return false;
-    }
-
     engine.soundSystem_ = soundSystem;
     engine.sampleRate_ = _sampleRate;
     engine.framesPerBuf_ = static_cast<uint32_t>(_framesPerBuf);
@@ -123,7 +117,7 @@ bool AAudioManager::createEngine(SoundSystem *soundSystem) {
 
     PrintAudioStreamInfo(engine.playStream_);
 
-    aaudio_stream_state_t result = AAudioStream_requestStart(engine.playStream_);
+    aaudio_result_t result = AAudioStream_requestStart(engine.playStream_);
     if (result != AAUDIO_OK) {
         assert(result == AAUDIO_OK);
         return false;
