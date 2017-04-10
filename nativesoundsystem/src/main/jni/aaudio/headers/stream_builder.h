@@ -22,7 +22,7 @@
 #include <cassert>
 
 //Replace this include with NDK's AAudio.h when available
-#include "aaudio_wrapper.h"
+#include <aaudio/AAudio.h>
 
 class StreamBuilder {
 

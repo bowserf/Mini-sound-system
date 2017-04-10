@@ -16,11 +16,17 @@ model {
         cppFlags.add("-std=c++11")
 
         platformVersion = rootProject.ext.minSdkVersion //same as minSdkVersion.apiLevel for better compatibility
-        if (rootProject.ext.minSdkVersion >= 25) {
-            ldLibs.addAll(["mediandk"])
-            cppFlags.addAll(["-DMEDIACODEC_EXTRACTOR", "-DAAUDIO"])
-            CFlags.addAll(["-DMEDIACODEC_EXTRACTOR", "-DAAUDIO"])
+        if(rootProject.ext.useAAudio) {
+            ldLibs.addAll(["mediandk", "aaudio"])
+            cppFlags.addAll(["-DAAUDIO", "-DMEDIACODEC_EXTRACTOR"])
+            CFlags.addAll(["-DAAUDIO", "-DMEDIACODEC_EXTRACTOR"])
+            platformVersion = 26 // AAudio headers are only available with API 26 but sdk 26 is not yet available
             stl "c++_static" // to access to 'thread' header, we did gnustl_static or c++_static
+        }else if (rootProject.ext.minSdkVersion >= 25) {
+            ldLibs.addAll(["mediandk"])
+            cppFlags.addAll(["-DMEDIACODEC_EXTRACTOR"])
+            CFlags.addAll(["-DMEDIACODEC_EXTRACTOR"])
+            stl "stlport_static"
         }else if(rootProject.ext.minSdkVersion >= 24) {
             cppFlags.addAll(["-DMEDIACODEC_EXTRACTOR"])
             CFlags.addAll(["-DMEDIACODEC_EXTRACTOR"])
