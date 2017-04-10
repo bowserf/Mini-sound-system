@@ -2,6 +2,8 @@ package fr.bowserf.testsoundsystem;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.media.MediaCodecInfo;
+import android.media.MediaCodecList;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -67,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
         initUI();
 
         attachToListeners();
+
+        displayAvailableAudioCodecs();
     }
 
     private void initUI() {
@@ -132,6 +136,34 @@ public class MainActivity extends AppCompatActivity {
     private void detachListeners() {
         mSoundSystem.removePlayingStatusObserver(mSSPlayingStatusObserver);
         mSoundSystem.removeExtractionObserver(mSSExtractionObserver);
+    }
+
+    private void displayAvailableAudioCodecs(){
+        final TextView tvAvailableCodecs = (TextView)findViewById(R.id.tv_available_codecs);
+
+        final MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
+        final MediaCodecInfo[] codecInfos = mediaCodecList.getCodecInfos();
+        final StringBuilder stringBuilder = new StringBuilder();
+        for (final MediaCodecInfo codecInfo : codecInfos) {
+            if(!codecInfo.isEncoder()) {
+                boolean isAudioCodec = false;
+                for (final String type : codecInfo.getSupportedTypes()) {
+                    if (type.contains("audio/")) {
+                        isAudioCodec = true;
+                    }
+                }
+                if(isAudioCodec){
+                    stringBuilder.append(codecInfo.getName()).append(" : \n");
+                    for (final String type : codecInfo.getSupportedTypes()) {
+                        if (type.contains("audio/")) {
+                            stringBuilder.append(type).append("\n");
+                        }
+                    }
+                }
+            }
+        }
+
+        tvAvailableCodecs.setText(stringBuilder.toString());
     }
 
     private SSExtractionObserver mSSExtractionObserver = new SSExtractionObserver() {
