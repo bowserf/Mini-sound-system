@@ -1,9 +1,11 @@
 package fr.bowserf.testsoundsystem;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.content.pm.PackageManager;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -70,7 +72,9 @@ public class MainActivity extends AppCompatActivity {
 
         attachToListeners();
 
-        displayAvailableAudioCodecs();
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            displayAvailableAudioCodecs();
+        }
     }
 
     private void initUI() {
@@ -138,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
         mSoundSystem.removeExtractionObserver(mSSExtractionObserver);
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void displayAvailableAudioCodecs(){
         final TextView tvAvailableCodecs = (TextView)findViewById(R.id.tv_available_codecs);
 
