@@ -69,6 +69,12 @@ OpenGL ES in order to display audio spectrum with a low level library instead of
 
 ### Other branches
 
+[AAudio player](https://github.com/bowserf/Mini-sound-system/tree/ft/aaudio_android_o) :
+With Android O, Google provides a new Audio API called AAudio focus on low latency. It has been developed to improve performances compare to OpenSL player.
+For now, we have only access to Android O preview 1 which has just a preview of the new API, without hoped performances but it provides a good idea of how it will work.
+MinSdkVersion 26 is not available yet so we use a boolean define inside build.gradle project to use good native library inside nativesoundsystem project.
+You need at NDK r15 to use AAudio because this version provide AAudio header files.
+
 [CMake to compile native code](https://github.com/bowserf/Mini-sound-system/tree/ft/cmake_in_library) :
 Use of standard android gradle with CMake in order to compile module `soundsystem` which contain native code.
 It differs from gradle-experimental because we haven't to add a native module which contains only C & C++ code
