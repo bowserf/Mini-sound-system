@@ -1,7 +1,5 @@
 #include "SoundSystem.h"
 
-static FILE* file;
-
 static double now_ms(void) {
     struct timespec res;
     clock_gettime(CLOCK_REALTIME, &res);
@@ -89,7 +87,6 @@ SoundSystem::SoundSystem(SoundSystemCallback *callback,
         _totalFrames(0),
         _soundBuffer(nullptr),
         _playerBuffer(nullptr){
-    file = fopen("/sdcard/Music/extract", "w+");
     this->_sampleRate = sampleRate;
     this->_bufferSize = bufSize;
 
@@ -142,7 +139,6 @@ SoundSystem::SoundSystem(SoundSystemCallback *callback,
 }
 
 SoundSystem::~SoundSystem() {
-    fclose(file);
     release();
 }
 
