@@ -364,7 +364,8 @@ void SoundSystem::play(bool play) {
         } else if (currentState == SL_PLAYSTATE_PLAYING) {
             result = (*_playerPlay)->SetPlayState(_playerPlay, SL_PLAYSTATE_PAUSED);
             SLASSERT(result);
-
+            result = (*_playerQueue)->Clear(_playerQueue);
+            SLASSERT(result);
             notifyPlayPause(false);
         }
     }
