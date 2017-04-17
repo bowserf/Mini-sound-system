@@ -63,7 +63,7 @@ bool isSoundSystemInit();
 
 SLDataLocator_URI *dataLocatorFromURLString(JNIEnv *env, jstring fileURLString);
 
-short* convertFloatDataToShort(float* data, unsigned int length);
+void convertFloatDataToShort(float* data, unsigned int length, short* dst);
 
 SLDataLocator_AndroidFD getTrackFromAsset(JNIEnv *env, jobject assetManager, jstring filename);
 

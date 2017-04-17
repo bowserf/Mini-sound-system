@@ -97,7 +97,8 @@ jshortArray Java_fr_bowserf_soundsystem_SoundSystem_native_1get_1extracted_1data
     AUDIO_HARDWARE_SAMPLE_TYPE* tmpExtractedData = _soundSystem->getExtractedData();
 
 #ifdef FLOAT_PLAYER
-    short* extractedData = convertFloatDataToShort(tmpExtractedData, length);
+    short* extractedData = (short*)calloc(length, sizeof(short));
+    convertFloatDataToShort(tmpExtractedData, length, extractedData);
 #else
     short* extractedData = tmpExtractedData;
 #endif
@@ -114,11 +115,12 @@ jshortArray Java_fr_bowserf_soundsystem_SoundSystem_native_1get_1extracted_1data
     if(!isSoundSystemInit()){
         return nullptr;
     }
-    unsigned int length = _soundSystem->getTotalNumberFrames();
     AUDIO_HARDWARE_SAMPLE_TYPE* tmpExtractedData = _soundSystem->getExtractedDataMono();
+    unsigned int length = _soundSystem->getTotalNumberFrames()/2;
 
 #ifdef FLOAT_PLAYER
-    short* extractedData = convertFloatDataToShort(tmpExtractedData, length);
+    short* extractedData = (short*)calloc(length, sizeof(short));
+    convertFloatDataToShort(tmpExtractedData, length, extractedData);
 #else
     short* extractedData = tmpExtractedData;
 #endif
@@ -173,15 +175,14 @@ SLDataLocator_URI *dataLocatorFromURLString(JNIEnv *env, jstring fileURLString) 
     return fileLoc;
 }
 
-short* convertFloatDataToShort(float* data, unsigned int length){
-    short* extractedData = (short*)calloc(length, sizeof(short));
+void convertFloatDataToShort(float* src, unsigned int length, short* dst){
     for(int i = 0 ; i < length ; i++){
-        float tmp = data[i];
+        float tmp = src[i];
         if (tmp > 1.f) {
             tmp = 1.f;
         }else if (tmp < -1.f){
             tmp = -1.f;
         }
-        extractedData[i] = tmp * SHRT_MAX;
+        dst[i] = tmp * SHRT_MAX;
     }
 }

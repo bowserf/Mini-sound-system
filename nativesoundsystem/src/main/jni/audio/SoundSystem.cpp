@@ -489,7 +489,6 @@ AUDIO_HARDWARE_SAMPLE_TYPE* SoundSystem::getExtractedDataMono() {
     AUDIO_HARDWARE_SAMPLE_TYPE* dataMono = (AUDIO_HARDWARE_SAMPLE_TYPE*) calloc(sizeof(AUDIO_HARDWARE_SAMPLE_TYPE), sizeDataMono);
 
     for(int i = 0 ; i < sizeDataMono ; i++){
-
         dataMono[i] = (_extractedData[i * 2] + _extractedData[i * 2 + 1]) / 2;
     }
     return dataMono;
