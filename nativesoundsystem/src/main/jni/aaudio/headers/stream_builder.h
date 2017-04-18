@@ -40,12 +40,11 @@ public:
     };
 
     StreamBuilder(
-            int32_t sampleRate,
             int32_t samplesPerFrame,
             aaudio_audio_format_t format,
             aaudio_sharing_mode_t sharing,
             aaudio_direction_t dir) :
-            sampleRate_(sampleRate),
+            sampleRate_(0),
             samplesPerFrame_(samplesPerFrame),
             format_(format),
             sharing_(sharing),

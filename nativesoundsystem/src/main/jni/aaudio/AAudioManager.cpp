@@ -80,12 +80,6 @@ void PlayAudioThreadProc(void *ctx) {
     LOGV("====Player is done");
 }
 
-AAudioManager::AAudioManager(int sampleRate, int framesPerBuf) :
-        _sampleRate(sampleRate),
-        _framesPerBuf(framesPerBuf) {
-
-}
-
 /*
  * Create sample engine and put application into started state:
  * audio is already rendering -- rendering silent audio.
@@ -95,8 +89,6 @@ bool AAudioManager::createEngine(SoundSystem *soundSystem) {
     memset(&engine, 0, sizeof(engine));
 
     engine.soundSystem_ = soundSystem;
-    engine.sampleRate_ = _sampleRate;
-    engine.framesPerBuf_ = static_cast<uint32_t>(_framesPerBuf);
     engine.sampleChannels_ = AUDIO_SAMPLE_CHANNELS;
 #ifdef FLOAT_PLAYER
     engine.sampleFormat_ = AAUDIO_FORMAT_PCM_FLOAT;
@@ -105,8 +97,7 @@ bool AAudioManager::createEngine(SoundSystem *soundSystem) {
 #endif
     engine.bitsPerSample_ = SampleFormatToBpp(engine.sampleFormat_);
 
-    StreamBuilder builder(engine.sampleRate_,
-                          engine.sampleChannels_,
+    StreamBuilder builder(engine.sampleChannels_,
                           engine.sampleFormat_,
                           AAUDIO_SHARING_MODE_SHARED,
                           AAUDIO_DIRECTION_OUTPUT);
@@ -114,9 +105,9 @@ bool AAudioManager::createEngine(SoundSystem *soundSystem) {
     engine.playStream_ = builder.Stream();
     assert(engine.playStream_);
 
-
     PrintAudioStreamInfo(engine.playStream_);
 
+    engine.sampleRate_ = AAudioStream_getSampleRate(engine.playStream_);
     aaudio_result_t result = AAudioStream_requestStart(engine.playStream_);
     if (result != AAUDIO_OK) {
         assert(result == AAUDIO_OK);
