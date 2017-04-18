@@ -24,7 +24,7 @@
  *   sine wave; if user asks to stop, renders silent audio (all 0s)
  *
  */
-void PlayAudioThreadProc(void *ctx) {
+void* PlayAudioThreadProc(void *ctx) {
     AAudioEngine *eng = reinterpret_cast<AAudioEngine *>(ctx);
 
     bool status = TunePlayerForLowLatency(engine.playStream_);
@@ -114,9 +114,13 @@ bool AAudioManager::createEngine(SoundSystem *soundSystem) {
         return false;
     }
 
-    std::thread t(PlayAudioThreadProc, &engine);
-    t.detach();
-    return true;
+    /*int64_t nanosPerWakeup = AAUDIO_NANOS_PER_SECOND * burstsPerWakeup * framesPerBurst / _sampleRate;*/
+    int64_t nanosPerWakeup = 100;
+    result = AAudioStream_createThread(engine.playStream_,
+                                       nanosPerWakeup,
+                                       PlayAudioThreadProc,
+                                       &engine);
+    return !(result != AAUDIO_OK);
 }
 
 /*
