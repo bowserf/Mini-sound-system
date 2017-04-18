@@ -13,7 +13,7 @@ void Java_fr_bowserf_soundsystem_SoundSystem_native_1init_1soundsystem(JNIEnv *e
 #endif
 
 #ifdef AAUDIO
-    _aaudio_manager = new AAudioManager(sample_rate, frames_per_buf);
+    _aaudio_manager = new AAudioManager();
     _aaudio_manager->createEngine(_soundSystem);
 #endif
 }

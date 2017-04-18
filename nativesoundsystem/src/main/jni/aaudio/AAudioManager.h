@@ -18,8 +18,7 @@
  * This Sample's Engine Structure
  */
 struct AAudioEngine {
-    uint32_t     sampleRate_;
-    uint32_t     framesPerBuf_;
+    int32_t     sampleRate_;
     uint16_t     sampleChannels_;
     uint16_t     bitsPerSample_;
     aaudio_audio_format_t sampleFormat_;
@@ -40,17 +39,11 @@ bool TunePlayerForLowLatency(AAudioStream* stream);
 class AAudioManager{
 public:
 
-    AAudioManager(int sampleRate, int framesPerBuf);
-
     bool createEngine(SoundSystem* soundSystem);
     bool start();
     bool stop();
     void deleteEngine();
 
-private:
-
-    int _sampleRate;
-    int _framesPerBuf;
 };
 
 
