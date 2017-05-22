@@ -51,14 +51,18 @@ public class AudioFeaturesManager {
 
         // get native sample rate
         final String sampleRateStr = am.getProperty(android.media.AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE);
-        mSampleRate = Integer.parseInt(sampleRateStr);
+        if(sampleRateStr != null) {
+            mSampleRate = Integer.parseInt(sampleRateStr);
+        }
         if (mSampleRate == 0) { // Use a default value if property not found
             mSampleRate = 44100;
         }
 
         // get native buffer size
         final String framesPerBuffer = am.getProperty(android.media.AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
-        mFramesPerBuffer = Integer.parseInt(framesPerBuffer);
+        if(framesPerBuffer != null) {
+            mFramesPerBuffer = Integer.parseInt(framesPerBuffer);
+        }
         if (mFramesPerBuffer == 0) { // Use default
             mFramesPerBuffer = 256;
         }
