@@ -3,6 +3,7 @@ package fr.bowserf.soundsystem;
 import android.content.res.AssetManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.Keep;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -190,6 +191,7 @@ public class SoundSystem {
      * Called from native code.
      */
     @SuppressWarnings("unused")
+    @Keep
     public void notifyPlayingStatusObserversEndTrack() {
         mMainHandler.post(new Runnable() {
             @Override
@@ -208,6 +210,7 @@ public class SoundSystem {
      * Called from native code.
      */
     @SuppressWarnings("unused")
+    @Keep
     public void notifyPlayingStatusObserversPlayPause(final boolean isPlaying) {
         mMainHandler.post(new Runnable() {
             @Override
@@ -226,6 +229,7 @@ public class SoundSystem {
      * Called from native code.
      */
     @SuppressWarnings("unused")
+    @Keep
     public void notifyStopTrack() {
         mMainHandler.post(new Runnable() {
             @Override
@@ -260,6 +264,7 @@ public class SoundSystem {
      * Called from native code.
      */
     @SuppressWarnings("unused")
+    @Keep
     public void notifyExtractionStarted() {
         mMainHandler.post(new Runnable() {
             @Override
@@ -278,6 +283,7 @@ public class SoundSystem {
      * Called from native code.
      */
     @SuppressWarnings("unused")
+    @Keep
     public void notifyExtractionCompleted() {
         mMainHandler.post(new Runnable() {
             @Override
