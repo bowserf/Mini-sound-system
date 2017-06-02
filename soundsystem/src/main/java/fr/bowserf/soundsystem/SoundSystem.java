@@ -157,6 +157,14 @@ public class SoundSystem {
         native_extract_from_assets_and_play(assetManager, fileName);
     }
 
+    /**
+     * Extract and directly play the audio file without step of extract the whole file into RAM.
+     * @param audioFilePath Local path of the audio file on device.
+     */
+    public void extractAndPlay(final String audioFilePath){
+        native_extract_and_play(audioFilePath);
+    }
+
     //---------------
     // - Listeners -
     //---------------
