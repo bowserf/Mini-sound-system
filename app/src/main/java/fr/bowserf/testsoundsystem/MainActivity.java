@@ -9,8 +9,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -71,44 +73,6 @@ public class MainActivity extends AppCompatActivity {
         initUI();
 
         attachToListeners();
-
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            displayAvailableAudioCodecs();
-        }
-    }
-
-    private void initUI() {
-        // extract button
-        mBtnExtractFile = (Button) findViewById(R.id.toggle_extract_file);
-        mBtnExtractFile.setOnClickListener(mOnClickListener);
-
-        // play pause button
-        mTogglePlayPause = (ToggleButton) findViewById(R.id.toggle_play_pause);
-        mTogglePlayPause.setOnCheckedChangeListener(mOnCheckedChangeListener);
-
-        // stop button
-        mToggleStop = (Button) findViewById(R.id.btn_stop);
-        mToggleStop.setOnClickListener(mOnClickListener);
-
-        // tv sound system status
-        mTvSoundSystemStatus = (TextView) findViewById(R.id.tv_sound_system_status);
-
-        // tv percentage displayed
-        mTvPercentageDisplayed = (TextView) findViewById(R.id.tv_percentage_displayed);
-
-        if(mSoundSystem.isLoaded()){
-            mTogglePlayPause.setEnabled(true);
-            mToggleStop.setEnabled(true);
-            mBtnExtractFile.setEnabled(false);
-        }else{
-            mBtnExtractFile.setEnabled(true);
-            mTogglePlayPause.setEnabled(false);
-            mToggleStop.setEnabled(false);
-        }
-
-        mTogglePlayPause.setChecked(mSoundSystem.isPlaying());
-
-        mSpectrum = (SpectrumGLSurfaceView)findViewById(R.id.spectrum);
     }
 
     @Override
@@ -132,6 +96,56 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            mSoundSystem.loadFile(FindTrackManager.getTrackPath(MainActivity.this).getPath());
+        } else {
+            Toast.makeText(this, "No permission, no extraction !", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void initUI() {
+        // extract button
+        mBtnExtractFile = (Button) findViewById(R.id.toggle_extract_file);
+        mBtnExtractFile.setOnClickListener(mOnClickListener);
+
+        // play pause button
+        mTogglePlayPause = (ToggleButton) findViewById(R.id.toggle_play_pause);
+        mTogglePlayPause.setOnCheckedChangeListener(mOnCheckedChangeListener);
+
+        // stop button
+        mToggleStop = (Button) findViewById(R.id.btn_stop);
+        mToggleStop.setOnClickListener(mOnClickListener);
+
+        // tv sound system status
+        mTvSoundSystemStatus = (TextView) findViewById(R.id.tv_sound_system_status);
+
+        // tv percentage displayed
+        mTvPercentageDisplayed = (TextView) findViewById(R.id.tv_percentage_displayed);
+
+        final Button buttonCodecs = (Button)findViewById(R.id.btn_display_available_codecs);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            buttonCodecs.setOnClickListener(mOnClickListener);
+        }else{
+            buttonCodecs.setVisibility(View.GONE);
+        }
+
+        if(mSoundSystem.isLoaded()){
+            mTogglePlayPause.setEnabled(true);
+            mToggleStop.setEnabled(true);
+            mBtnExtractFile.setEnabled(false);
+        }else{
+            mBtnExtractFile.setEnabled(true);
+            mTogglePlayPause.setEnabled(false);
+            mToggleStop.setEnabled(false);
+        }
+
+        mTogglePlayPause.setChecked(mSoundSystem.isPlaying());
+
+        mSpectrum = (SpectrumGLSurfaceView)findViewById(R.id.spectrum);
+    }
+
     private void attachToListeners() {
         mSoundSystem.addPlayingStatusObserver(mSSPlayingStatusObserver);
         mSoundSystem.addExtractionObserver(mSSExtractionObserver);
@@ -144,9 +158,7 @@ public class MainActivity extends AppCompatActivity {
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void displayAvailableAudioCodecs(){
-        final TextView tvAvailableCodecs = (TextView)findViewById(R.id.tv_available_codecs);
-
-        final MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
+        final MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.ALL_CODECS);
         final MediaCodecInfo[] codecInfos = mediaCodecList.getCodecInfos();
         final StringBuilder stringBuilder = new StringBuilder();
         for (final MediaCodecInfo codecInfo : codecInfos) {
@@ -168,7 +180,12 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        tvAvailableCodecs.setText(stringBuilder.toString());
+        final AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setTitle("Available codecs :")
+                .setMessage(stringBuilder.toString())
+                .setPositiveButton(android.R.string.ok, null)
+                .create();
+        alertDialog.show();
     }
 
     private SSExtractionObserver mSSExtractionObserver = new SSExtractionObserver() {
@@ -230,6 +247,9 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.btn_stop:
                     mSoundSystem.stopMusic();
                     break;
+                case R.id.btn_display_available_codecs:
+                    displayAvailableAudioCodecs();
+                    break;
             }
         }
     };
@@ -237,18 +257,12 @@ public class MainActivity extends AppCompatActivity {
     private void loadTrackOrAskPermission() {
         final int permissionCheck = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
         if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
-            mSoundSystem.loadFile(FindTrackManager.getTrackPath(MainActivity.this).getPath());
+            String trackPath = FindTrackManager.getTrackPath(MainActivity.this).getPath();
+            Log.i(TAG, trackPath);
+            mSoundSystem.loadFile(trackPath);
         } else {
-            askForReadExternalStoragePermission();
-        }
-    }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            mSoundSystem.loadFile(FindTrackManager.getTrackPath(MainActivity.this).getPath());
-        } else {
-            Toast.makeText(this, "No permission, no extraction !", Toast.LENGTH_SHORT).show();
+            askForReadExternalStoragePermission();
         }
     }
 
