@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         final AudioFeaturesManager audioFeaturesManager = AudioFeaturesManager.init(this);
 
         mSoundSystem = SoundSystem.getInstance();
-        if(!mSoundSystem.isSoundSystemInit()) {
+        if (!mSoundSystem.isSoundSystemInit()) {
             mSoundSystem.initSoundSystem(
                     audioFeaturesManager.getSampleRate(),
                     audioFeaturesManager.getFramesPerBuffer());
@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
         attachToListeners();
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             displayAvailableAudioCodecs();
         }
     }
@@ -96,11 +96,11 @@ public class MainActivity extends AppCompatActivity {
         // tv percentage displayed
         mTvPercentageDisplayed = (TextView) findViewById(R.id.tv_percentage_displayed);
 
-        if(mSoundSystem.isLoaded()){
+        if (mSoundSystem.isLoaded()) {
             mTogglePlayPause.setEnabled(true);
             mToggleStop.setEnabled(true);
             mBtnExtractFile.setEnabled(false);
-        }else{
+        } else {
             mBtnExtractFile.setEnabled(true);
             mTogglePlayPause.setEnabled(false);
             mToggleStop.setEnabled(false);
@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
 
         mTogglePlayPause.setChecked(mSoundSystem.isPlaying());
 
-        mSpectrum = (SpectrumGLSurfaceView)findViewById(R.id.spectrum);
+        mSpectrum = (SpectrumGLSurfaceView) findViewById(R.id.spectrum);
     }
 
     @Override
@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if(!isChangingConfigurations()) {
+        if (!isChangingConfigurations()) {
             detachListeners();
             mSoundSystem.release();
         }
@@ -143,21 +143,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void displayAvailableAudioCodecs(){
-        final TextView tvAvailableCodecs = (TextView)findViewById(R.id.tv_available_codecs);
+    private void displayAvailableAudioCodecs() {
+        final TextView tvAvailableCodecs = (TextView) findViewById(R.id.tv_available_codecs);
 
         final MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
         final MediaCodecInfo[] codecInfos = mediaCodecList.getCodecInfos();
         final StringBuilder stringBuilder = new StringBuilder();
         for (final MediaCodecInfo codecInfo : codecInfos) {
-            if(!codecInfo.isEncoder()) {
+            if (!codecInfo.isEncoder()) {
                 boolean isAudioCodec = false;
                 for (final String type : codecInfo.getSupportedTypes()) {
                     if (type.contains("audio/")) {
                         isAudioCodec = true;
                     }
                 }
-                if(isAudioCodec){
+                if (isAudioCodec) {
                     stringBuilder.append(codecInfo.getName()).append(" : \n");
                     for (final String type : codecInfo.getSupportedTypes()) {
                         if (type.contains("audio/")) {

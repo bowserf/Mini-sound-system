@@ -25,15 +25,16 @@
 /*
  * Audio Sample Controls...
  */
-#define AUDIO_SAMPLE_CHANNELS               2
+#define AUDIO_SAMPLE_CHANNELS 2
 
-uint16_t SampleFormatToBpp(aaudio_audio_format_t format);
+uint16_t SampleFormatToBpp(aaudio_format_t format);
+
 /*
  * GetSystemTicks(void):  return the time in micro sec
  */
 __inline__ uint64_t GetSystemTicks(void) {
     struct timeval Time;
-    gettimeofday( &Time, NULL );
+    gettimeofday(&Time, NULL);
 
     return (static_cast<uint64_t>(1000000) * Time.tv_sec + Time.tv_usec);
 }
@@ -43,7 +44,8 @@ __inline__ uint64_t GetSystemTicks(void) {
  */
 //#define ENABLE_LOG  1
 
-void PrintAudioStreamInfo(const AAudioStream * stream);
+void PrintAudioStreamInfo(const AAudioStream *stream);
+
 #endif // AAUDIO_AUDIO_COMMON_H
 
 #endif

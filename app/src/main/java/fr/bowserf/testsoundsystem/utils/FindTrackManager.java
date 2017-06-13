@@ -37,7 +37,7 @@ public class FindTrackManager {
         final int numberMusicFiles = musicCursorExtern.getCount();
         if (numberMusicFiles == 0) {
             return null;
-        }else if(numberMusicFiles == mCount -1){
+        } else if (numberMusicFiles == mCount - 1) {
             mCount = -1;
         }
 
