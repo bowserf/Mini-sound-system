@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         final AudioFeaturesManager audioFeaturesManager = AudioFeaturesManager.init(this);
 
         mSoundSystem = SoundSystem.getInstance();
-        if(!mSoundSystem.isSoundSystemInit()) {
+        if (!mSoundSystem.isSoundSystemInit()) {
             mSoundSystem.initSoundSystem(
                     audioFeaturesManager.getSampleRate(),
                     audioFeaturesManager.getFramesPerBuffer());
@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
             mTogglePlayPause.setEnabled(true);
             mToggleStop.setEnabled(true);
             mBtnExtractFile.setEnabled(false);
-        }else{
+        } else {
             mBtnExtractFile.setEnabled(true);
             mTogglePlayPause.setEnabled(false);
             mToggleStop.setEnabled(false);
@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
 
         mTogglePlayPause.setChecked(mSoundSystem.isPlaying());
 
-        mSpectrum = (SpectrumGLSurfaceView)findViewById(R.id.spectrum);
+        mSpectrum = (SpectrumGLSurfaceView) findViewById(R.id.spectrum);
     }
 
     private void attachToListeners() {
@@ -162,14 +162,14 @@ public class MainActivity extends AppCompatActivity {
         final MediaCodecInfo[] codecInfos = mediaCodecList.getCodecInfos();
         final StringBuilder stringBuilder = new StringBuilder();
         for (final MediaCodecInfo codecInfo : codecInfos) {
-            if(!codecInfo.isEncoder()) {
+            if (!codecInfo.isEncoder()) {
                 boolean isAudioCodec = false;
                 for (final String type : codecInfo.getSupportedTypes()) {
                     if (type.contains("audio/")) {
                         isAudioCodec = true;
                     }
                 }
-                if(isAudioCodec){
+                if (isAudioCodec) {
                     stringBuilder.append(codecInfo.getName()).append(" : \n");
                     for (final String type : codecInfo.getSupportedTypes()) {
                         if (type.contains("audio/")) {

@@ -3,26 +3,24 @@ apply plugin: 'com.android.model.native'
 model {
     android {
         compileSdkVersion rootProject.ext.compileSdkVersion
-
-        // This allows the library project to be built in debug mode, so we can actually debug it
-        publishNonDefault true
     }
 
     android.ndk {
         moduleName = "soundsystem"
-        ldLibs.addAll(["log", "android", "OpenSLES"])
+        ldLibs.addAll(["log", "android", "atomic", "OpenSLES"])
         abiFilters.addAll(["armeabi", "armeabi-v7a", "x86"])
         CFlags.add("-std=c99")
         cppFlags.add("-std=c++11")
 
-        platformVersion = rootProject.ext.minSdkVersion //same as minSdkVersion.apiLevel for better compatibility
-        if(rootProject.ext.useAAudio) {
+        platformVersion = rootProject.ext.minSdkVersion
+        //same as minSdkVersion.apiLevel for better compatibility
+        if (rootProject.ext.minSdkVersion >= 26) {
             ldLibs.addAll(["mediandk", "aaudio"])
             cppFlags.addAll(["-DAAUDIO", "-DMEDIACODEC_EXTRACTOR"])
             CFlags.addAll(["-DAAUDIO", "-DMEDIACODEC_EXTRACTOR"])
-            platformVersion = 26 // AAudio headers are only available with API 26 but sdk 26 is not yet available
+            // AAudio headers are only available with API 26 but sdk 26 is not yet available
             stl "c++_static" // to access to 'thread' header, we did gnustl_static or c++_static
-        }else if(rootProject.ext.minSdkVersion >= 24) {
+        } else if (rootProject.ext.minSdkVersion >= 24) {
             ldLibs.addAll(["mediandk"])
             cppFlags.addAll(["-DMEDIACODEC_EXTRACTOR"])
             CFlags.addAll(["-DMEDIACODEC_EXTRACTOR"])
@@ -31,7 +29,7 @@ model {
             cppFlags.addAll(["-DFLOAT_PLAYER"])
             CFlags.addAll(["-DFLOAT_PLAYER"])
             stl "stlport_static"
-        }else{
+        } else {
             stl "stlport_static"
         }
     }

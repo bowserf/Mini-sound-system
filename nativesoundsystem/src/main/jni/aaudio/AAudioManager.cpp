@@ -18,66 +18,79 @@
 
 #include "AAudioManager.h"
 
-/*
- * PlayAudioThreadProc()
- *   Rendering audio frames continuously; if user asks to play audio, render
- *   sine wave; if user asks to stop, renders silent audio (all 0s)
- *
- */
-void* PlayAudioThreadProc(void *ctx) {
-    AAudioEngine *eng = reinterpret_cast<AAudioEngine *>(ctx);
+aaudio_data_callback_result_t dataCallback(
+        AAudioStream *stream,
+        void *userData,
+        void *audioData,
+        int32_t numFrames) {
 
-    bool status = TunePlayerForLowLatency(engine.playStream_);
-    if (!status) {
-        // if tune up is failed, audio could still play
-        LOGW("Failed to tune up the audio buffer size, low latency audio may not be guaranteed");
+    assert(userData && audioData);
+    AAudioEngine *eng = reinterpret_cast<AAudioEngine *>(userData);
+    assert(stream == eng->playStream_);
+
+    // Tuning the buffer size for low latency...
+    int32_t underRun = AAudioStream_getXRunCount(eng->playStream_);
+    if (underRun > eng->underRunCount_) {
+        /*
+         * Underrun happened since last callback:
+         * try to increase the buffer size.
+         */
+        eng->underRunCount_ = underRun;
+
+        aaudio_result_t actSize = AAudioStream_setBufferSizeInFrames(
+                stream, eng->bufSizeInFrames_ + eng->framesPerBurst_);
+        if (actSize > 0) {
+            eng->bufSizeInFrames_ = actSize;
+        } else {
+            LOGE("[AAudioManager] Output stream buffer tuning error: %s",
+                 AAudio_convertResultToText(actSize));
+        }
     }
-    // double check the tuning result: not necessary
-    PrintAudioStreamInfo(engine.playStream_);
 
-    LOGV("=====: currentState=%d", AAudioStream_getState(eng->playStream_));
+    int32_t samplesPerFrame = eng->sampleChannels_;
+    AUDIO_HARDWARE_SAMPLE_TYPE *bufferDest = static_cast<AUDIO_HARDWARE_SAMPLE_TYPE *>(audioData);
 
-    int32_t framesPerBurst = AAudioStream_getFramesPerBurst(eng->playStream_);
-    int32_t channelCount = AAudioStream_getSamplesPerFrame(eng->playStream_);
+    if (eng->playAudio_) {
+        PrintAudioStreamInfo(engine.playStream_);
 
-    LOGI("channel count %d", channelCount);
-    LOGI("framesPerBurst %d", framesPerBurst);
+        aaudio_stream_state_t aaudioStreamState = AAudioStream_getState(eng->playStream_);
+        LOGV("[AAudioManager] currentState=%d %s", aaudioStreamState,
+             AAudio_convertStreamStateToText(aaudioStreamState));
+//        if (aaudioStreamState == AAUDIO_STREAM_STATE_STARTING) {
+//            memset(static_cast<AUDIO_HARDWARE_SAMPLE_TYPE *>(audioData), 0,
+//                   sizeof(AUDIO_HARDWARE_SAMPLE_TYPE) * samplesPerFrame * numFrames);
+//            return AAUDIO_CALLBACK_RESULT_CONTINUE;
+//        }
 
-    int numberElements = framesPerBurst * channelCount;
-    int sizeBuffer = numberElements * sizeof(AUDIO_HARDWARE_SAMPLE_TYPE);
+        int32_t framesPerBurst = AAudioStream_getFramesPerBurst(eng->playStream_);
+        int32_t channelCount = AAudioStream_getSamplesPerFrame(eng->playStream_);
 
-    AUDIO_HARDWARE_SAMPLE_TYPE *buf = new AUDIO_HARDWARE_SAMPLE_TYPE[sizeBuffer];
-    assert(buf);
+        LOGI("[AAudioManager] channel count %d", channelCount);
+        LOGI("[AAudioManager] framesPerBurst %d", framesPerBurst);
 
-    aaudio_result_t result;
+        int numberElements = numFrames * channelCount;
+        size_t sizeBuffer = numberElements * sizeof(AUDIO_HARDWARE_SAMPLE_TYPE);
+        aaudio_result_t framesWritten;
 
-    while (!eng->requestStop_) {
         if (eng->playAudio_ && eng->playPosition_ < eng->soundSystem_->getTotalNumberFrames()) {
+
+            // End of track
             if (eng->playPosition_ > eng->soundSystem_->getTotalNumberFrames() - numberElements) {
-                sizeBuffer = (eng->soundSystem_->getTotalNumberFrames() - eng->playPosition_) * sizeof(AUDIO_HARDWARE_SAMPLE_TYPE);
+                sizeBuffer = (eng->soundSystem_->getTotalNumberFrames() - eng->playPosition_) *
+                             sizeof(AUDIO_HARDWARE_SAMPLE_TYPE);
             }
-            memmove(buf, eng->soundSystem_->getExtractedData() + eng->playPosition_,
+            memmove(bufferDest, eng->soundSystem_->getExtractedData() + eng->playPosition_,
                     sizeBuffer);
             eng->playPosition_ += numberElements;
         } else {
-            memset(buf, 0, sizeBuffer);
+            memset(bufferDest, 0, sizeBuffer);
         }
-        result = AAudioStream_write(eng->playStream_,
-                                    buf,
-                                    framesPerBurst,
-                                    100000000);
-        assert(result > 0);
+    } else {
+        memset(static_cast<AUDIO_HARDWARE_SAMPLE_TYPE *>(audioData), 0,
+               sizeof(AUDIO_HARDWARE_SAMPLE_TYPE) * samplesPerFrame * numFrames);
     }
 
-    delete[] buf;
-    eng->requestStop_ = false;
-
-    AAudioStream_requestStop(eng->playStream_);
-
-    AAudioStream_close(eng->playStream_);
-    eng->playStream_ = nullptr;
-
-    LOGV("====Player is done");
+    return AAUDIO_CALLBACK_RESULT_CONTINUE;
 }
 
 /*
@@ -85,7 +98,6 @@ void* PlayAudioThreadProc(void *ctx) {
  * audio is already rendering -- rendering silent audio.
  */
 bool AAudioManager::createEngine(SoundSystem *soundSystem) {
-
     memset(&engine, 0, sizeof(engine));
 
     engine.soundSystem_ = soundSystem;
@@ -97,29 +109,31 @@ bool AAudioManager::createEngine(SoundSystem *soundSystem) {
 #endif
     engine.bitsPerSample_ = SampleFormatToBpp(engine.sampleFormat_);
 
-    StreamBuilder builder(engine.sampleChannels_,
-                          engine.sampleFormat_,
-                          AAUDIO_SHARING_MODE_SHARED,
-                          AAUDIO_DIRECTION_OUTPUT);
+    StreamBuilder builder;
+    engine.playStream_ = builder.CreateStream(
+            engine.sampleFormat_,
+            engine.sampleChannels_,
+            AAUDIO_SHARING_MODE_SHARED,
+            AAUDIO_DIRECTION_OUTPUT,
+            INVALID_AUDIO_PARAM,
+            dataCallback,
+            &engine);
 
-    engine.playStream_ = builder.Stream();
     assert(engine.playStream_);
 
     PrintAudioStreamInfo(engine.playStream_);
-
     engine.sampleRate_ = AAudioStream_getSampleRate(engine.playStream_);
+    engine.framesPerBurst_ = AAudioStream_getFramesPerBurst(engine.playStream_);
+    engine.defaultBufSizeInFrames_ = AAudioStream_getBufferSizeInFrames(engine.playStream_);
+    AAudioStream_setBufferSizeInFrames(engine.playStream_, engine.framesPerBurst_);
+    engine.bufSizeInFrames_ = engine.framesPerBurst_;
+
     aaudio_result_t result = AAudioStream_requestStart(engine.playStream_);
     if (result != AAUDIO_OK) {
         assert(result == AAUDIO_OK);
         return false;
     }
-
-    /*int64_t nanosPerWakeup = AAUDIO_NANOS_PER_SECOND * burstsPerWakeup * framesPerBurst / _sampleRate;*/
-    int64_t nanosPerWakeup = 100;
-    result = AAudioStream_createThread(engine.playStream_,
-                                       nanosPerWakeup,
-                                       PlayAudioThreadProc,
-                                       &engine);
+    engine.underRunCount_ = AAudioStream_getXRunCount(engine.playStream_);
     return !(result != AAUDIO_OK);
 }
 
@@ -159,98 +173,6 @@ void AAudioManager::deleteEngine() {
         return;
     }
     engine.requestStop_ = true;
-}
-
-/*
- * TunePlayerForLowLatency()
- *   start from the framesPerBurst, find out the smallest size that has no
- *   underRan for buffer between Application and AAudio
- *  If tune-up failed, we still let it continue by restoring the value
- *  upon entering the function; the failure of the tuning is notified to
- *  caller with false return value.
- * Return:
- *   true:  tune-up is completed, AAudio is at its best
- *   false: tune-up is not complete, AAudio is at its default condition
- */
-bool TunePlayerForLowLatency(AAudioStream *stream) {
-    aaudio_stream_state_t state = AAudioStream_getState(stream);
-
-    if (state == AAUDIO_STREAM_STATE_STARTING) {
-        aaudio_result_t result;
-        aaudio_stream_state_t nextState = AAUDIO_STREAM_STATE_UNINITIALIZED;
-        do {
-            result = AAudioStream_waitForStateChange(stream,
-                                                     state,
-                                                     &nextState,
-                                                     100 * 1000000);
-        } while ((result == AAUDIO_OK || result == AAUDIO_ERROR_TIMEOUT)
-                 && nextState == AAUDIO_STREAM_STATE_UNINITIALIZED);
-        state = AAudioStream_getState(stream);
-    }
-
-    if (state != AAUDIO_STREAM_STATE_STARTED) {
-        LOGE("stream(%p) is not in started state when tuning", stream);
-        return false;
-    }
-
-    int32_t framesPerBurst = AAudioStream_getFramesPerBurst(stream);
-    int32_t orgSize = AAudioStream_getBufferSizeInFrames(
-            stream);//Query the maximum number of frames that can be filled without blocking.
-
-    int32_t bufSize = framesPerBurst;
-    int32_t bufCap = AAudioStream_getBufferCapacityInFrames(
-            stream);//Query maximum buffer capacity in frames.
-
-    uint8_t *buf = new uint8_t[bufCap * engine.bitsPerSample_ / 8];
-    assert(buf);
-    memset(buf, 0, bufCap * engine.bitsPerSample_ / 8);
-
-    int32_t prevXRun = AAudioStream_getXRunCount(stream);
-    int32_t prevBufSize = 0;
-    bool trainingError = false;
-    while (bufSize <= bufCap) {
-        aaudio_result_t result = AAudioStream_setBufferSizeInFrames(stream, bufSize);
-        if (result <= AAUDIO_OK) {
-            trainingError = true;
-            break;
-        }
-
-        // check whether we are really setting to our value
-        // AAudio might already reached its optimized state
-        // so we set-get-compare, then act accordingly
-        bufSize = AAudioStream_getBufferSizeInFrames(stream);
-        if (bufSize == prevBufSize) {
-            // AAudio refuses to go up, tuning is complete
-            break;
-        }
-        // remember the current buf size so we could continue for next round tuning up
-        prevBufSize = bufSize;
-        result = AAudioStream_write(stream, buf, bufCap, 1000000000);
-
-        if (result < 0) {
-            assert(result >= 0);
-            trainingError = true;
-            break;
-        }
-        int32_t curXRun = AAudioStream_getXRunCount(stream);
-        if (curXRun <= prevXRun) {
-            // no more errors, we are done
-            break;
-        }
-        prevXRun = curXRun;
-        bufSize += framesPerBurst;
-    }
-
-    delete[] buf;
-    if (trainingError) {
-        // we are playing conservative here: if anything wrong, we restore to default
-        // size WHEN engine was created
-        AAudioStream_setBufferSizeInFrames(stream, orgSize);
-        return false;
-    }
-    bufSize = AAudioStream_getBufferSizeInFrames(stream);
-    LOGI("TunePlayerForLowLatency Bufsize : %d", bufSize);
-    return true;
 }
 
 #endif

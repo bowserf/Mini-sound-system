@@ -24,42 +24,15 @@
 //Replace this include with NDK's AAudio.h when available
 #include <aaudio/AAudio.h>
 
+#define INVALID_AUDIO_PARAM 0
+
 class StreamBuilder {
-
 public:
-
-    StreamBuilder() :
-            sampleRate_(0),
-            samplesPerFrame_(0),
-            format_(AAUDIO_FORMAT_PCM_I16),
-            sharing_(AAUDIO_SHARING_MODE_SHARED),
-            direction_(AAUDIO_DIRECTION_OUTPUT),
-            stream_(nullptr) {
+    explicit StreamBuilder() {
         aaudio_result_t result = AAudio_createStreamBuilder(&builder_);
-        assert(result == AAUDIO_OK && builder_);
-    };
-
-    StreamBuilder(
-            int32_t samplesPerFrame,
-            aaudio_audio_format_t format,
-            aaudio_sharing_mode_t sharing,
-            aaudio_direction_t dir) :
-            sampleRate_(0),
-            samplesPerFrame_(samplesPerFrame),
-            format_(format),
-            sharing_(sharing),
-            direction_(dir) {
-        aaudio_result_t result = AAudio_createStreamBuilder(&builder_);
-        assert(result == AAUDIO_OK && builder_);
-
-        AAudioStreamBuilder_setSampleRate(builder_, sampleRate_);
-        AAudioStreamBuilder_setSamplesPerFrame(builder_, samplesPerFrame_);
-        AAudioStreamBuilder_setFormat(builder_, format_);
-        AAudioStreamBuilder_setSharingMode(builder_, sharing_);
-        AAudioStreamBuilder_setDirection(builder_, direction_);
-
-        result = AAudioStreamBuilder_openStream(builder_, &stream_);
-        assert(result == AAUDIO_OK && stream_);
+        if (result != AAUDIO_OK && !builder_) {
+            assert(false);
+        }
     }
 
     ~StreamBuilder() {
@@ -68,59 +41,43 @@ public:
         builder_ = nullptr;
     };
 
-    int32_t DeviceId(void) {
-        return stream_ ? AAudioStream_getDeviceId(stream_) : 0;
-    }
+    /*
+     * purposely left
+     *     deviceID
+     *     bufferSize
+     *     sampleRate
+     * as default, expecting that AAudio will pick up the right one for us
+     */
+    AAudioStream *CreateStream(
+            aaudio_format_t format,
+            int32_t samplesPerFrame,
+            aaudio_sharing_mode_t sharing,
+            aaudio_direction_t dir = AAUDIO_DIRECTION_OUTPUT,
+            int32_t sampleRate = INVALID_AUDIO_PARAM,
+            AAudioStream_dataCallback callback = nullptr,
+            void *userData = nullptr) {
 
-    void SampleRate(int32_t rate) { sampleRate_ = rate; }
-
-    int32_t SampleRate(void) const { return sampleRate_; }
-
-    void SamplesPerFrame(int32_t samplesPerFrame) { samplesPerFrame_ = samplesPerFrame; }
-
-    int32_t SamplesPerFrame(void) { return samplesPerFrame_; }
-
-    void Format(aaudio_audio_format_t format) { format_ = format; }
-
-    aaudio_audio_format_t Format(void) const { return format_; }
-
-    void SharingMode(aaudio_sharing_mode_t sharing) { sharing_ = sharing; }
-
-    aaudio_sharing_mode_t SharingMode(void) const { return sharing_; }
-
-    void Direction(aaudio_direction_t dir) { direction_ = dir; }
-
-    aaudio_direction_t Direction(void) const { return direction_; }
-
-    int32_t BufferCapacity(void) {
-        return stream_
-               ? AAudioStream_getBufferCapacityInFrames(stream_)
-               : 0;
-    }
-
-    AAudioStream *Stream(void) {
-        if (!stream_) {
-            AAudioStreamBuilder_setSampleRate(builder_, sampleRate_);
-            AAudioStreamBuilder_setSamplesPerFrame(builder_, samplesPerFrame_);
-            AAudioStreamBuilder_setFormat(builder_, format_);
-            AAudioStreamBuilder_setSharingMode(builder_, sharing_);
-            AAudioStreamBuilder_setDirection(builder_, direction_);
-            aaudio_result_t result = AAudioStreamBuilder_openStream(builder_, &stream_);
-            assert(stream_ && result == AAUDIO_OK);
+        AAudioStreamBuilder_setFormat(builder_, format);
+        AAudioStreamBuilder_setSharingMode(builder_, sharing);
+        AAudioStreamBuilder_setDirection(builder_, dir);
+        AAudioStreamBuilder_setSampleRate(builder_, sampleRate);
+        AAudioStreamBuilder_setSamplesPerFrame(builder_, samplesPerFrame);
+        if (sampleRate != INVALID_AUDIO_PARAM) {
+            AAudioStreamBuilder_setSampleRate(builder_, sampleRate);
         }
-        return stream_;
+        AAudioStreamBuilder_setDataCallback(builder_, callback, userData);
+
+        AAudioStream *stream;
+        aaudio_result_t result = AAudioStreamBuilder_openStream(builder_, &stream);
+        if (result != AAUDIO_OK) {
+            assert(false);
+            stream = nullptr;
+        }
+        return stream;
     }
 
 private:
-
     AAudioStreamBuilder *builder_;
-    int32_t sampleRate_;
-    int32_t samplesPerFrame_;
-    aaudio_audio_format_t format_;
-    aaudio_sharing_mode_t sharing_;
-    aaudio_direction_t direction_;
-    AAudioStream *stream_;
-
 };
 
 #endif //AAUDIO_STREAM_BIULDER_H

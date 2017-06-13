@@ -9,9 +9,6 @@ model {
             minSdkVersion.apiLevel rootProject.ext.minSdkVersion
             targetSdkVersion.apiLevel rootProject.ext.targetSdkVersion
         }
-
-        // This allows the library project to be built in debug mode, so we can actually debug it
-        publishNonDefault true
     }
 
     android.sources {

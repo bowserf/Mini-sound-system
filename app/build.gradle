@@ -28,7 +28,7 @@ android {
 dependencies {
     compile 'com.android.support:appcompat-v7:25.0.1'
 
-    //compile project(':soundsystem')
-    releaseCompile project(path: ':soundsystem', configuration: 'release')
-    debugCompile project(path: ':soundsystem', configuration: 'debug')
+    compile project(':soundsystem')
+    //releaseCompile project(path: ':soundsystem', configuration: 'release')
+    //debugCompile project(path: ':soundsystem', configuration: 'debug')
 }
