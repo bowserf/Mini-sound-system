@@ -1,19 +1,3 @@
-/*
- * Copyright 2017 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 #ifdef AAUDIO
 
 #include "AAudioManager.h"
@@ -26,62 +10,57 @@ aaudio_data_callback_result_t dataCallback(
 
     assert(userData && audioData);
     AAudioEngine *eng = reinterpret_cast<AAudioEngine *>(userData);
-    assert(stream == eng->playStream_);
+    assert(stream == eng->playStream);
 
     // Tuning the buffer size for low latency...
-    int32_t underRun = AAudioStream_getXRunCount(eng->playStream_);
-    if (underRun > eng->underRunCount_) {
+    int32_t underRun = AAudioStream_getXRunCount(eng->playStream);
+    if (underRun > eng->underRunCount) {
         /*
          * Underrun happened since last callback:
          * try to increase the buffer size.
          */
-        eng->underRunCount_ = underRun;
+        eng->underRunCount = underRun;
 
         aaudio_result_t actSize = AAudioStream_setBufferSizeInFrames(
-                stream, eng->bufSizeInFrames_ + eng->framesPerBurst_);
+                stream, eng->bufSizeInFrames + eng->framesPerBurst);
         if (actSize > 0) {
-            eng->bufSizeInFrames_ = actSize;
+            eng->bufSizeInFrames = actSize;
         } else {
             LOGE("[AAudioManager] Output stream buffer tuning error: %s",
                  AAudio_convertResultToText(actSize));
         }
     }
 
-    int32_t samplesPerFrame = eng->sampleChannels_;
+    int32_t samplesPerFrame = eng->sampleChannels;
     AUDIO_HARDWARE_SAMPLE_TYPE *bufferDest = static_cast<AUDIO_HARDWARE_SAMPLE_TYPE *>(audioData);
 
-    if (eng->playAudio_) {
-        PrintAudioStreamInfo(engine.playStream_);
+    if (eng->playAudio) {
+        // there is currently a bug in AAudio where currentState always equal to
+        // AAUDIO_STREAM_STATE_STARTING instead of AAUDIO_STREAM_STATE_STARTED so we can't apply
+        // this check for now.
+        //
+        //aaudio_stream_state_t aaudioStreamState = AAudioStream_getState(eng->playStream);
+        //LOGV("[AAudioManager] currentState=%d %s", aaudioStreamState,
+        //     AAudio_convertStreamStateToText(aaudioStreamState));
+        //if (aaudioStreamState == AAUDIO_STREAM_STATE_STARTING) {
+        //    memset(static_cast<AUDIO_HARDWARE_SAMPLE_TYPE *>(audioData), 0,
+        //           sizeof(AUDIO_HARDWARE_SAMPLE_TYPE) * samplesPerFrame * numFrames);
+        //    return AAUDIO_CALLBACK_RESULT_CONTINUE;
+        //}
 
-        aaudio_stream_state_t aaudioStreamState = AAudioStream_getState(eng->playStream_);
-        LOGV("[AAudioManager] currentState=%d %s", aaudioStreamState,
-             AAudio_convertStreamStateToText(aaudioStreamState));
-//        if (aaudioStreamState == AAUDIO_STREAM_STATE_STARTING) {
-//            memset(static_cast<AUDIO_HARDWARE_SAMPLE_TYPE *>(audioData), 0,
-//                   sizeof(AUDIO_HARDWARE_SAMPLE_TYPE) * samplesPerFrame * numFrames);
-//            return AAUDIO_CALLBACK_RESULT_CONTINUE;
-//        }
-
-        int32_t framesPerBurst = AAudioStream_getFramesPerBurst(eng->playStream_);
-        int32_t channelCount = AAudioStream_getSamplesPerFrame(eng->playStream_);
-
-        LOGI("[AAudioManager] channel count %d", channelCount);
-        LOGI("[AAudioManager] framesPerBurst %d", framesPerBurst);
-
+        int32_t channelCount = AAudioStream_getSamplesPerFrame(eng->playStream);
         int numberElements = numFrames * channelCount;
         size_t sizeBuffer = numberElements * sizeof(AUDIO_HARDWARE_SAMPLE_TYPE);
-        aaudio_result_t framesWritten;
 
-        if (eng->playAudio_ && eng->playPosition_ < eng->soundSystem_->getTotalNumberFrames()) {
-
+        if (eng->playAudio && eng->playPosition < eng->soundSystem->getTotalNumberFrames()) {
             // End of track
-            if (eng->playPosition_ > eng->soundSystem_->getTotalNumberFrames() - numberElements) {
-                sizeBuffer = (eng->soundSystem_->getTotalNumberFrames() - eng->playPosition_) *
+            if (eng->playPosition > eng->soundSystem->getTotalNumberFrames() - numberElements) {
+                sizeBuffer = (eng->soundSystem->getTotalNumberFrames() - eng->playPosition) *
                              sizeof(AUDIO_HARDWARE_SAMPLE_TYPE);
             }
-            memmove(bufferDest, eng->soundSystem_->getExtractedData() + eng->playPosition_,
+            memmove(bufferDest, eng->soundSystem->getExtractedData() + eng->playPosition,
                     sizeBuffer);
-            eng->playPosition_ += numberElements;
+            eng->playPosition += numberElements;
         } else {
             memset(bufferDest, 0, sizeBuffer);
         }
@@ -100,40 +79,38 @@ aaudio_data_callback_result_t dataCallback(
 bool AAudioManager::createEngine(SoundSystem *soundSystem) {
     memset(&engine, 0, sizeof(engine));
 
-    engine.soundSystem_ = soundSystem;
-    engine.sampleChannels_ = AUDIO_SAMPLE_CHANNELS;
+    engine.soundSystem = soundSystem;
+    engine.sampleChannels = AUDIO_SAMPLE_CHANNELS;
 #ifdef FLOAT_PLAYER
     engine.sampleFormat_ = AAUDIO_FORMAT_PCM_FLOAT;
 #else
-    engine.sampleFormat_ = AAUDIO_FORMAT_PCM_I16;
+    engine.sampleFormat = AAUDIO_FORMAT_PCM_I16;
 #endif
-    engine.bitsPerSample_ = SampleFormatToBpp(engine.sampleFormat_);
 
     StreamBuilder builder;
-    engine.playStream_ = builder.CreateStream(
-            engine.sampleFormat_,
-            engine.sampleChannels_,
+    engine.playStream = builder.CreateStream(
+            engine.sampleFormat,
+            engine.sampleChannels,
             AAUDIO_SHARING_MODE_SHARED,
+            AAUDIO_PERFORMANCE_MODE_LOW_LATENCY,
             AAUDIO_DIRECTION_OUTPUT,
             INVALID_AUDIO_PARAM,
             dataCallback,
             &engine);
 
-    assert(engine.playStream_);
+    assert(engine.playStream);
 
-    PrintAudioStreamInfo(engine.playStream_);
-    engine.sampleRate_ = AAudioStream_getSampleRate(engine.playStream_);
-    engine.framesPerBurst_ = AAudioStream_getFramesPerBurst(engine.playStream_);
-    engine.defaultBufSizeInFrames_ = AAudioStream_getBufferSizeInFrames(engine.playStream_);
-    AAudioStream_setBufferSizeInFrames(engine.playStream_, engine.framesPerBurst_);
-    engine.bufSizeInFrames_ = engine.framesPerBurst_;
+    PrintAudioStreamInfo(engine.playStream);
+    engine.framesPerBurst = AAudioStream_getFramesPerBurst(engine.playStream);
+    AAudioStream_setBufferSizeInFrames(engine.playStream, engine.framesPerBurst);
+    engine.bufSizeInFrames = engine.framesPerBurst;
 
-    aaudio_result_t result = AAudioStream_requestStart(engine.playStream_);
+    aaudio_result_t result = AAudioStream_requestStart(engine.playStream);
     if (result != AAUDIO_OK) {
         assert(result == AAUDIO_OK);
         return false;
     }
-    engine.underRunCount_ = AAudioStream_getXRunCount(engine.playStream_);
+    engine.underRunCount = AAudioStream_getXRunCount(engine.playStream);
     return !(result != AAUDIO_OK);
 }
 
@@ -142,11 +119,11 @@ bool AAudioManager::createEngine(SoundSystem *soundSystem) {
  *   start to render sine wave audio.
  */
 bool AAudioManager::start() {
-    if (!engine.playStream_) {
+    if (!engine.playStream) {
         return false;
     }
 
-    engine.playAudio_ = true;
+    engine.playAudio = true;
     return true;
 }
 
@@ -155,11 +132,11 @@ bool AAudioManager::start() {
  *   stop rendering sine wave audio ( resume rendering silent audio )
  */
 bool AAudioManager::stop() {
-    if (!engine.playStream_) {
+    if (!engine.playStream) {
         return true;
     }
 
-    engine.playAudio_ = false;
+    engine.playAudio = false;
     return true;
 }
 
@@ -169,10 +146,9 @@ bool AAudioManager::stop() {
  *   flag and rendering thread will see it and perform clean-up
  */
 void AAudioManager::deleteEngine() {
-    if (!engine.playStream_) {
+    if (!engine.playStream) {
         return;
     }
-    engine.requestStop_ = true;
 }
 
 #endif

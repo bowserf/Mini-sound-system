@@ -1,13 +1,8 @@
-//
-// Created by Frederic on 23/03/2017.
-//
-
 #ifdef AAUDIO
 
 #ifndef MINI_SOUND_SYSTEM_AAUDIOMANAGER_H
 #define MINI_SOUND_SYSTEM_AAUDIOMANAGER_H
 
-#include <thread>
 #include <cassert>
 #include <audio/SoundSystem.h>
 
@@ -18,27 +13,24 @@
  * This Sample's Engine Structure
  */
 struct AAudioEngine {
-    uint32_t sampleRate_;
-    uint16_t sampleChannels_;
-    uint16_t bitsPerSample_;
-    aaudio_format_t sampleFormat_;
+    uint16_t sampleChannels;
+    aaudio_format_t sampleFormat;
 
-    SoundSystem *soundSystem_;
+    SoundSystem *soundSystem;
 
-    AAudioStream *playStream_;
-    bool requestStop_;
-    bool playAudio_;
+    AAudioStream *playStream;
+    bool playAudio;
 
-    int playPosition_;
+    int playPosition;
 
-    int32_t underRunCount_;
-    int32_t bufSizeInFrames_;
-    int32_t framesPerBurst_;
-    int32_t defaultBufSizeInFrames_;
+    int32_t underRunCount;
+    int32_t bufSizeInFrames;
+    int32_t framesPerBurst;
 };
 static AAudioEngine engine;
 
 class AAudioManager {
+
 public:
 
     bool createEngine(SoundSystem *soundSystem);
@@ -48,6 +40,7 @@ public:
     bool stop();
 
     void deleteEngine();
+
 };
 
 
