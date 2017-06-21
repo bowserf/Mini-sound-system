@@ -128,7 +128,7 @@ Java_fr_bowserf_soundsystem_SoundSystem_native_1get_1extracted_1data(JNIEnv *env
     if (!isSoundSystemInit()) {
         return nullptr;
     }
-    unsigned int length = _soundSystem->getTotalNumberFrames() / 40;
+    unsigned int length = _soundSystem->getTotalNumberFrames();
     AUDIO_HARDWARE_SAMPLE_TYPE *tmpExtractedData = _soundSystem->getExtractedData();
 
 #ifdef FLOAT_PLAYER
