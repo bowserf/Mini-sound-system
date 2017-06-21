@@ -196,7 +196,6 @@ SLDataLocator_AndroidFD getTrackFromAsset(JNIEnv *env, jobject assetManager, jst
 
 bool isSoundSystemInit() {
     if (_soundSystem == NULL) {
-        LOGE("_soundSystem is not initialize");
         return false;
     }
     return true;
