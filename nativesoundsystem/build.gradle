@@ -41,10 +41,3 @@ model {
         }
     }
 }
-
-configurations {
-    // Expose the debug version of the library to other modules
-    debug
-    release
-}
-
