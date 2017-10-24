@@ -5,13 +5,10 @@
 
 #include <cassert>
 #include <audio/SoundSystem.h>
-
+#include <pthread.h>
 #include "AAudioCommon.h"
-#include "aaudio/headers/stream_builder.h"
+#include "Mutex.h"
 
-/*
- * This Sample's Engine Structure
- */
 struct AAudioEngine {
     uint16_t sampleChannels;
     aaudio_format_t sampleFormat;
@@ -33,16 +30,35 @@ class AAudioManager {
 
 public:
 
-    bool createEngine(SoundSystem *soundSystem);
+    AAudioManager(SoundSystem *soundSystem);
+
+    ~AAudioManager();
+
+    bool createPlaybackStream();
 
     bool start();
 
     bool stop();
 
-    void deleteEngine();
+    void closeOutputStream();
+
+    void errorCallback(AAudioStream *stream, aaudio_result_t error);
+
+private:
+
+    AAudioStreamBuilder *createStreamBuilder();
+
+    AAudioStream *createStream(
+            AAudioStreamBuilder *builder,
+            aaudio_format_t format,
+            int32_t sampleChannels,
+            aaudio_sharing_mode_t sharing,
+            aaudio_direction_t dir,
+            AAudioStream_dataCallback callback,
+            AAudioStream_errorCallback errorCallback,
+            void *userData);
 
 };
-
 
 #endif //MINI_SOUND_SYSTEM_AAUDIOMANAGER_H
 

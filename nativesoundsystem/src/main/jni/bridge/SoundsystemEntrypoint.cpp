@@ -13,8 +13,7 @@ void Java_fr_bowserf_soundsystem_SoundSystem_native_1init_1soundsystem(JNIEnv *e
 #endif
 
 #ifdef AAUDIO
-    _aaudio_manager = new AAudioManager();
-    _aaudio_manager->createEngine(_soundSystem);
+    _aaudio_manager = new AAudioManager(_soundSystem);
 #endif
 }
 
@@ -75,7 +74,7 @@ void Java_fr_bowserf_soundsystem_SoundSystem_native_1stop(JNIEnv *env, jclass jc
     }
     _soundSystem->stop();
 #ifdef AAUDIO
-    _aaudio_manager->deleteEngine();
+    _aaudio_manager->closeOutputStream();
 #endif
 }
 
