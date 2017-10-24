@@ -15,7 +15,8 @@ model {
         //same as minSdkVersion.apiLevel for better compatibility
         platformVersion = rootProject.ext.minSdkVersion
 
-        stl "stlport_static"
+        toolchain "clang"
+        stl "c++_static"
 
         if (rootProject.ext.minSdkVersion >= 26) {
             ldLibs.addAll(["mediandk", "aaudio"])
